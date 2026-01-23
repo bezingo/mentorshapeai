@@ -1,0 +1,18 @@
+task_groups:
+  - name: Schema Extensions
+    claude_code_subagent: Database Engineer
+    standards:
+      - all
+  - name: Goal Shaper Agent Implementation
+    claude_code_subagent: AI Engineer
+    standards:
+      - all
+  - name: Goal Shaper API Endpoint
+    claude_code_subagent: API Engineer
+    standards:
+      - all
+  - name: Goal Creation Integration
+    claude_code_subagent: Frontend Engineer
+    standards:
+      - all
+

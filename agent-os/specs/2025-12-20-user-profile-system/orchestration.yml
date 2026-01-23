@@ -1,0 +1,37 @@
+task_groups:
+  - name: Schema Extensions and Migrations
+    claude_code_subagent: Database Engineer
+    standards:
+      - all
+  - name: Profile API Extensions
+    claude_code_subagent: API Engineer
+    standards:
+      - all
+  - name: Work Experience, Education, and Skills CRUD APIs
+    claude_code_subagent: API Engineer
+    standards:
+      - all
+  - name: LinkedIn and CV Import APIs
+    claude_code_subagent: API Engineer
+    standards:
+      - all
+  - name: Profile Edit Page UI Components
+    claude_code_subagent: UI Designer
+    standards:
+      - all
+  - name: Work History, Education, and Skills UI Sections
+    claude_code_subagent: UI Designer
+    standards:
+      - all
+  - name: Import UI and Mentor Fields
+    claude_code_subagent: UI Designer
+    standards:
+      - all
+  - name: Public Profile Page Enhancement
+    claude_code_subagent: Frontend Engineer
+    standards:
+      - all
+  - name: Test Review and Gap Analysis
+    claude_code_subagent: QA Engineer
+    standards:
+      - all
