@@ -10,7 +10,9 @@ import {
   Settings,
   Building2,
   Menu,
-  X
+  X,
+  Clock,
+  Package
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -22,6 +24,7 @@ interface NavItem {
   href: string
   icon: React.ComponentType<{ className?: string }>
   roles?: ('mentor' | 'mentee')[]
+  indent?: boolean
 }
 
 const navItems: NavItem[] = [
@@ -51,6 +54,20 @@ const navItems: NavItem[] = [
     href: '/dashboard/mentor',
     icon: Users,
     roles: ['mentor'],
+  },
+  {
+    title: 'Availability',
+    href: '/dashboard/mentor/availability',
+    icon: Clock,
+    roles: ['mentor'],
+    indent: true,
+  },
+  {
+    title: 'Offers',
+    href: '/dashboard/mentor/offers',
+    icon: Package,
+    roles: ['mentor'],
+    indent: true,
   },
   {
     title: 'Organizations',
@@ -108,7 +125,8 @@ export function DashboardSidebar() {
                     'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                     isActive
                       ? 'bg-primary text-primary-foreground'
-                      : 'hover:bg-muted'
+                      : 'hover:bg-muted',
+                    item.indent && 'ml-4'
                   )}
                 >
                   <Icon className="h-4 w-4" />

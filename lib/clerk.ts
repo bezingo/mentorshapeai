@@ -246,14 +246,24 @@ export async function requireAuth() {
 }
 
 /**
- * Require mentor role - throws error if not mentor
+ * Require mentor role - redirects or throws error if not mentor
+ * @param options.redirectTo - If provided, redirect to this URL instead of throwing
+ * @returns The current profile if user is a mentor
  */
-export async function requireMentor() {
+export async function requireMentor(options?: { redirectTo?: string }) {
+  const { redirect } = await import('next/navigation')
+  
   await requireAuth()
-  const mentor = await isMentor()
-  if (!mentor) {
+  const profile = await getCurrentProfile()
+  
+  if (!profile?.is_mentor) {
+    if (options?.redirectTo) {
+      redirect(options.redirectTo)
+    }
     throw new Error('Forbidden: Must be a mentor')
   }
+  
+  return profile
 }
 
 /**

@@ -1,0 +1,6 @@
+export { WelcomeStep } from './WelcomeStep'
+export { BioExpertiseStep } from './BioExpertiseStep'
+export { SkillsLanguagesStep } from './SkillsLanguagesStep'
+export { AvailabilityStep } from './AvailabilityStep'
+export { HandleStep } from './HandleStep'
+export { ReviewStep } from './ReviewStep'

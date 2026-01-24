@@ -14,9 +14,17 @@ const isDashboardRoute = createRouteMatcher([
   '/dashboard(.*)',
 ])
 
+const isMentorRoute = createRouteMatcher([
+  '/mentor(.*)',
+])
+
 export default clerkMiddleware(async (auth, request) => {
   // Protect dashboard routes
   if (isDashboardRoute(request)) {
+    await auth.protect()
+  }
+  // Protect mentor routes (onboarding, etc.)
+  else if (isMentorRoute(request)) {
     await auth.protect()
   }
   // Protect all other routes except public ones

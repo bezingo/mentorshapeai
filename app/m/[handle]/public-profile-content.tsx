@@ -1,11 +1,33 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { ChevronDown, ChevronUp, Star, Share2, Pencil, Globe, Clock, Briefcase } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronUp,
+  Star,
+  Share2,
+  Pencil,
+  Globe,
+  Clock,
+  Briefcase,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
+
+// Import mentor profile components
+import {
+  MentorProfileHero,
+  MentorHeroData,
+  ExpertiseSection,
+  TestimonialsSection,
+  BadgesSection,
+  MentorBadge,
+  OffersSection,
+  PublicMentorOffer,
+  RequestMentorshipModal,
+} from '@/components/mentor/profile'
 
 // Profile type definition
 interface Profile {
@@ -75,7 +97,11 @@ interface PublicProfileContentProps {
 }
 
 // Helper to format date range (year only)
-function formatDateRange(startDate: string, endDate: string | null, isCurrent?: boolean): string {
+function formatDateRange(
+  startDate: string,
+  endDate: string | null,
+  isCurrent?: boolean
+): string {
   const startYear = new Date(startDate).getFullYear()
 
   if (isCurrent || !endDate) {
@@ -98,7 +124,6 @@ function getDaysSinceUpdate(updatedAt: string | null): number {
 // Helper to format timezone nicely
 function formatTimezone(timezone: string | null): string {
   if (!timezone) return ''
-  // Convert IANA timezone to readable format
   try {
     const formatter = new Intl.DateTimeFormat('en-US', {
       timeZone: timezone,
@@ -166,7 +191,13 @@ function CollapsibleSection({
 }
 
 // Star Rating Component
-function StarRating({ rating = 0, maxRating = 5 }: { rating?: number; maxRating?: number }) {
+function StarRating({
+  rating = 0,
+  maxRating = 5,
+}: {
+  rating?: number
+  maxRating?: number
+}) {
   return (
     <div className="flex items-center gap-0.5">
       {Array.from({ length: maxRating }).map((_, index) => (
@@ -223,7 +254,266 @@ function TagDisplay({
   )
 }
 
-export function PublicProfileContent({
+// Mentor profile data interface for API response
+interface MentorProfileData {
+  id: string
+  display_name: string | null
+  headline: string | null
+  bio: string | null
+  avatar_url: string | null
+  public_handle: string
+  location: string | null
+  timezone: string | null
+  years_of_experience: number | null
+  expertise_areas: string[]
+  languages: string[]
+  can_mentor_for: string[]
+  specializations: string[]
+  member_since: string
+  mentor_since: string | null
+  skills: Array<{ id: string; name: string; level: string }>
+  work_experiences: WorkExperience[]
+  education: Education[]
+  offers: PublicMentorOffer[]
+  badges: MentorBadge[]
+  stats: {
+    total_ratings: number
+    average_rating: number | null
+    total_collaborations: number
+  }
+}
+
+/**
+ * Enhanced mentor profile content using the new mentor profile components
+ */
+function MentorProfileContent({
+  profile,
+  workExperiences,
+  educations,
+  skills,
+  isOwnProfile,
+}: {
+  profile: Profile
+  workExperiences: WorkExperience[]
+  educations: Education[]
+  skills: Skill[]
+  isOwnProfile: boolean
+}) {
+  const [mentorData, setMentorData] = useState<MentorProfileData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedOffer, setSelectedOffer] = useState<PublicMentorOffer | null>(
+    null
+  )
+
+  const daysSinceUpdate = getDaysSinceUpdate(profile.updated_at)
+
+  // Fetch enhanced mentor data from the API
+  useEffect(() => {
+    async function fetchMentorData() {
+      try {
+        const response = await fetch(
+          `/api/public/mentor/${profile.public_handle}`
+        )
+        if (response.ok) {
+          const data = await response.json()
+          setMentorData(data.data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch mentor data:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchMentorData()
+  }, [profile.public_handle])
+
+  // Build hero data from mentor data or profile
+  const heroData: MentorHeroData = {
+    id: profile.id,
+    display_name: mentorData?.display_name || profile.display_name,
+    headline: mentorData?.headline || profile.headline,
+    avatar_url: mentorData?.avatar_url || profile.avatar_url,
+    public_handle: profile.public_handle,
+    location: mentorData?.location || null,
+    timezone: mentorData?.timezone || profile.timezone,
+    years_of_experience:
+      mentorData?.years_of_experience || profile.years_of_experience,
+    expertise_areas: mentorData?.expertise_areas || profile.expertise_areas || [],
+    languages: mentorData?.languages || profile.languages || [],
+    mentor_since: mentorData?.mentor_since || null,
+    stats: mentorData?.stats || {
+      total_ratings: 0,
+      average_rating: null,
+      total_collaborations: 0,
+    },
+  }
+
+  // Handle offer selection
+  const handleSelectOffer = (offer: PublicMentorOffer) => {
+    setSelectedOffer(offer)
+    setIsModalOpen(true)
+  }
+
+  // Handle request mentorship click
+  const handleRequestMentorship = () => {
+    setSelectedOffer(null)
+    setIsModalOpen(true)
+  }
+
+  const offers = mentorData?.offers || []
+  const badges = mentorData?.badges || []
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto max-w-2xl px-4 py-8 sm:py-12">
+        {/* Mentor Profile Hero */}
+        <MentorProfileHero
+          mentor={heroData}
+          isOwnProfile={isOwnProfile}
+          className="mb-8"
+        />
+
+        {/* Main Content Sections */}
+        <div className="space-y-8">
+          {/* Bio Section */}
+          {profile.bio && (
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold">About</h2>
+              <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                {profile.bio}
+              </p>
+            </div>
+          )}
+
+          {/* Expertise Section */}
+          <ExpertiseSection
+            expertiseAreas={
+              mentorData?.expertise_areas || profile.expertise_areas || []
+            }
+            canMentorFor={mentorData?.can_mentor_for || profile.can_mentor_for || []}
+            specializations={
+              mentorData?.specializations || profile.specializations || []
+            }
+          />
+
+          {/* Badges Section */}
+          {badges.length > 0 && <BadgesSection badges={badges} />}
+
+          {/* Testimonials Section */}
+          <TestimonialsSection mentorHandle={profile.public_handle} />
+
+          {/* Offers Section */}
+          <OffersSection offers={offers} onSelectOffer={handleSelectOffer} />
+
+          {/* Career Path Section */}
+          {profile.work_history_public && workExperiences.length > 0 && (
+            <CollapsibleSection
+              title="Career Path"
+              updatedDaysAgo={daysSinceUpdate}
+            >
+              <div className="space-y-4">
+                {workExperiences.map((exp) => (
+                  <div
+                    key={exp.id}
+                    className="flex items-start justify-between py-2"
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium">{exp.title}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {exp.company}
+                      </p>
+                      {exp.description && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {exp.description}
+                        </p>
+                      )}
+                    </div>
+                    <span className="text-sm text-muted-foreground ml-4 whitespace-nowrap">
+                      {formatDateRange(exp.start_date, exp.end_date, exp.is_current)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </CollapsibleSection>
+          )}
+
+          {/* Education Section */}
+          {profile.education_public && educations.length > 0 && (
+            <CollapsibleSection
+              title="Education"
+              updatedDaysAgo={daysSinceUpdate}
+            >
+              <div className="space-y-4">
+                {educations.map((edu) => (
+                  <div
+                    key={edu.id}
+                    className="flex items-start justify-between py-2"
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium">{edu.degree}</p>
+                      <p className="text-sm text-muted-foreground">
+                        at {edu.institution}
+                      </p>
+                    </div>
+                    <span className="text-sm text-muted-foreground ml-4 whitespace-nowrap">
+                      {formatDateRange(edu.start_date, edu.end_date, edu.is_current)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </CollapsibleSection>
+          )}
+
+          {/* Skills Section */}
+          {profile.skills_public && skills.length > 0 && (
+            <CollapsibleSection title="Skills" updatedDaysAgo={daysSinceUpdate}>
+              <div className="flex flex-wrap gap-2">
+                {skills.map((skill) => (
+                  <span
+                    key={skill.id}
+                    className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm font-medium"
+                  >
+                    {skill.name}
+                  </span>
+                ))}
+              </div>
+            </CollapsibleSection>
+          )}
+        </div>
+
+        {/* Sticky Request Mentorship CTA - Only show for visitors */}
+        {!isOwnProfile && (
+          <div className="mt-8 pt-6 border-t sticky bottom-0 bg-background pb-4">
+            <Button
+              onClick={handleRequestMentorship}
+              className="w-full h-12 text-base font-medium"
+              size="lg"
+            >
+              Request Mentorship
+            </Button>
+          </div>
+        )}
+
+        {/* Request Mentorship Modal */}
+        <RequestMentorshipModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          mentorName={profile.display_name || 'this mentor'}
+          mentorHandle={profile.public_handle}
+          offers={offers}
+          selectedOffer={selectedOffer}
+        />
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Regular (non-mentor) profile content - original implementation
+ */
+function RegularProfileContent({
   profile,
   workExperiences,
   educations,
@@ -241,16 +531,14 @@ export function PublicProfileContent({
       try {
         await navigator.share({
           title: `${profile.display_name} | Mentor on Mentorshape`,
-          text: profile.headline || 'Check out this mentor on Mentorshape',
+          text: profile.headline || 'Check out this profile on Mentorshape',
           url: profileUrl,
         })
       } catch {
-        // User cancelled share or share failed, fall back to clipboard
         await navigator.clipboard.writeText(profileUrl)
       }
     } else {
       await navigator.clipboard.writeText(profileUrl)
-      // Could add toast notification here
     }
   }
 
@@ -265,7 +553,7 @@ export function PublicProfileContent({
               <div className="relative h-28 w-28 sm:h-32 sm:w-32">
                 <Image
                   src={profile.avatar_url}
-                  alt={profile.display_name || 'Mentor'}
+                  alt={profile.display_name || 'User'}
                   fill
                   sizes="128px"
                   className="rounded-full object-cover ring-4 ring-background shadow-lg"
@@ -283,7 +571,7 @@ export function PublicProfileContent({
 
           {/* Name */}
           <h1 className="text-2xl sm:text-3xl font-bold mb-1">
-            {profile.display_name || 'Mentor'}
+            {profile.display_name || 'User'}
           </h1>
 
           {/* Current Company and University */}
@@ -305,7 +593,7 @@ export function PublicProfileContent({
             </span>
           </div>
 
-          {/* Star Rating (placeholder for future ratings feature) */}
+          {/* Star Rating (placeholder) */}
           <div className="mt-3">
             <StarRating rating={3} />
           </div>
@@ -357,27 +645,31 @@ export function PublicProfileContent({
         )}
 
         {/* Expertise Areas (for mentors) */}
-        {profile.is_mentor && profile.expertise_areas && profile.expertise_areas.length > 0 && (
-          <div className="mb-6">
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              {profile.expertise_areas.map((area) => (
-                <span
-                  key={area}
-                  className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary"
-                >
-                  {area}
-                </span>
-              ))}
+        {profile.is_mentor &&
+          profile.expertise_areas &&
+          profile.expertise_areas.length > 0 && (
+            <div className="mb-6">
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {profile.expertise_areas.map((area) => (
+                  <span
+                    key={area}
+                    className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary"
+                  >
+                    {area}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Languages (for mentors) */}
-        {profile.is_mentor && profile.languages && profile.languages.length > 0 && (
-          <div className="mb-8 text-center text-sm text-muted-foreground">
-            <span>Speaks: {profile.languages.join(', ')}</span>
-          </div>
-        )}
+        {profile.is_mentor &&
+          profile.languages &&
+          profile.languages.length > 0 && (
+            <div className="mb-8 text-center text-sm text-muted-foreground">
+              <span>Speaks: {profile.languages.join(', ')}</span>
+            </div>
+          )}
 
         {/* Main Content Sections */}
         <div className="space-y-2">
@@ -442,10 +734,7 @@ export function PublicProfileContent({
 
           {/* Traits Section */}
           {profile.traits_public && (
-            <CollapsibleSection
-              title="Traits"
-              updatedDaysAgo={daysSinceUpdate}
-            >
+            <CollapsibleSection title="Traits" updatedDaysAgo={daysSinceUpdate}>
               <div className="space-y-0">
                 <TagDisplay
                   label="Languages"
@@ -478,10 +767,7 @@ export function PublicProfileContent({
 
           {/* Skills */}
           {profile.skills_public && skills.length > 0 && (
-            <CollapsibleSection
-              title="Skills"
-              updatedDaysAgo={daysSinceUpdate}
-            >
+            <CollapsibleSection title="Skills" updatedDaysAgo={daysSinceUpdate}>
               <div className="flex flex-wrap gap-2">
                 {skills.map((skill) => (
                   <span
@@ -515,10 +801,34 @@ export function PublicProfileContent({
         {profile.bio && (
           <div className="mt-8 pt-6 border-t">
             <h2 className="text-lg font-semibold mb-3">About</h2>
-            <p className="text-muted-foreground whitespace-pre-wrap">{profile.bio}</p>
+            <p className="text-muted-foreground whitespace-pre-wrap">
+              {profile.bio}
+            </p>
           </div>
         )}
       </div>
     </div>
   )
+}
+
+/**
+ * Public profile content component that renders different layouts
+ * based on whether the profile is a mentor or not.
+ */
+export function PublicProfileContent(props: PublicProfileContentProps) {
+  // Use the enhanced mentor profile layout for mentors
+  if (props.profile.is_mentor) {
+    return (
+      <MentorProfileContent
+        profile={props.profile}
+        workExperiences={props.workExperiences}
+        educations={props.educations}
+        skills={props.skills}
+        isOwnProfile={props.isOwnProfile}
+      />
+    )
+  }
+
+  // Use the regular profile layout for non-mentors
+  return <RegularProfileContent {...props} />
 }

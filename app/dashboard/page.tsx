@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { getCurrentProfile } from '@/lib/clerk'
 import { Card } from '@/components/ui/card'
 import { auth } from '@clerk/nextjs/server'
+import { BecomeMentorCard } from '@/components/mentor/BecomeMentorCard'
 
 export default async function DashboardPage() {
   // Check Clerk authentication first
@@ -21,7 +22,7 @@ export default async function DashboardPage() {
         <div>
           <h1 className="text-3xl font-bold">Error setting up profile</h1>
           <p className="text-muted-foreground">
-            We couldn't create your profile. Please try refreshing the page.
+            We couldn&apos;t create your profile. Please try refreshing the page.
           </p>
         </div>
         <Card className="p-6">
@@ -34,8 +35,54 @@ export default async function DashboardPage() {
   }
 
   // Determine default view based on roles
+  // If user is only a mentee (not a mentor), show goals with "Become a Mentor" CTA
   if (profile.is_mentee && !profile.is_mentor) {
-    redirect('/dashboard/mentee/goals')
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Welcome back!</h1>
+          <p className="text-muted-foreground">
+            Manage your goals, track progress, and collaborate with mentors.
+          </p>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Main content - Goals card */}
+          <div className="lg:col-span-2 space-y-4">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-2">My Goals</h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                View and manage your personal and professional goals.
+              </p>
+              <a
+                href="/dashboard/mentee/goals"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Go to Goals →
+              </a>
+            </Card>
+
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-2">Collaborations</h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                View your mentoring relationships and sessions.
+              </p>
+              <a
+                href="/dashboard/collaborations"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                View Collaborations →
+              </a>
+            </Card>
+          </div>
+
+          {/* Sidebar - Become a Mentor CTA */}
+          <div>
+            <BecomeMentorCard />
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (profile.is_mentor && !profile.is_mentee) {
