@@ -36,21 +36,21 @@ Enable mentors to create public profiles and showcase their expertise.
 
 Enable mentor-mentee collaboration lifecycle and structured focus sessions.
 
-13. [ ] **Collaboration Lifecycle** — Complete collab flow from request to acceptance, including notifications, status tracking (pending/active/completed), and both-party approval `M`
+13. [x] **Collaboration Lifecycle** — Complete collab flow from request to acceptance, including notifications, status tracking (pending/active/completed), and both-party approval `M`
 
-14. [ ] **Focus Booking System** — Mentees select available time slots from mentor calendar, creating calendar events and focus session records in database `M`
+14. [x] **Focus Booking System** — Mentees select available time slots from mentor calendar, creating calendar events and focus session records in database `M`
 
-15. [ ] **AI Focus Planner Agent** — Pre-focus AI agent generating agendas with topics to cover, questions to ask, review of previous actions, and preparation suggestions based on goal and previous focuses `M`
+15. [x] **AI Focus Planner Agent** — Pre-focus AI agent generating agendas with topics to cover, questions to ask, review of previous actions, and preparation suggestions based on goal and previous focuses `M`
 
-16. [ ] **Video Meeting Integration** — Zoom API integration for creating meetings, fetching recordings, and extracting transcripts (Google Meet as alternative via Calendar) `L`
+16. [x] **Video Meeting Integration** — Zoom API integration for creating meetings, fetching recordings, and extracting transcripts (Google Meet as alternative via Calendar) `L`
 
-17. [ ] **AI Transcript Summarizer Agent** — Post-focus agent that processes transcripts to generate summaries, key decisions, action items for mentee & mentor, and milestone status updates `M`
+17. [x] **AI Transcript Summarizer Agent** — Post-focus agent that processes transcripts to generate summaries, key decisions, action items for mentee & mentor, and milestone status updates `M`
 
-18. [ ] **Milestone Progress Tracking** — Visual dashboard showing milestone completion, focus timeline, action items, blockers, and weekly check-ins (mood, progress notes) for mentees `M`
+18. [x] **Milestone Progress Tracking** — Visual dashboard showing milestone completion, focus timeline, action items, blockers, and weekly check-ins (mood, progress notes) for mentees `M`
 
-19. [ ] **AI Progress Tracker Agent** — Weekly agent that scores progress (0-100), identifies stalled areas, predicts completion risk, and sends nudges to mentee/mentor `M`
+19. [x] **AI Progress Tracker Agent** — Weekly agent that scores progress (0-100), identifies stalled areas, predicts completion risk, and sends nudges to mentee/mentor `M`
 
-20. [ ] **Goal Completion Flow** — Mark goal complete, trigger AI Completion Agent for final summary, award mentor badge, generate shareable LinkedIn achievement post, allow mentee reflection `S`
+20. [x] **Goal Completion Flow** — Mark goal complete, trigger AI Completion Agent for final summary, award mentor badge, generate shareable LinkedIn achievement post, allow mentee reflection `S`
 
 ## Phase 4: Monetization
 
