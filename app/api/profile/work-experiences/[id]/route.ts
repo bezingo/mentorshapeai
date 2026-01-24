@@ -19,7 +19,7 @@ const WorkExperienceUpdateSchema = z.object({
  */
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const profile = await getCurrentProfile()
@@ -31,11 +31,12 @@ export async function GET(
       )
     }
 
+    const { id } = await params
     const supabase = await createClient()
     const { data, error } = await supabase
       .from('work_experiences')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('profile_id', profile.id)
       .single()
 
@@ -69,7 +70,7 @@ export async function GET(
  */
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const profile = await getCurrentProfile()
@@ -81,12 +82,14 @@ export async function PUT(
       )
     }
 
+    const { id } = await params
+
     // Verify ownership first
     const supabase = await createClient()
     const { data: existing, error: fetchError } = await supabase
       .from('work_experiences')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('profile_id', profile.id)
       .single()
 
@@ -128,7 +131,7 @@ export async function PUT(
     const { data, error } = await supabase
       .from('work_experiences')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('profile_id', profile.id)
       .select()
       .single()
@@ -157,7 +160,7 @@ export async function PUT(
  */
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const profile = await getCurrentProfile()
@@ -169,12 +172,14 @@ export async function DELETE(
       )
     }
 
+    const { id } = await params
+
     // Verify ownership first
     const supabase = await createClient()
     const { data: existing, error: fetchError } = await supabase
       .from('work_experiences')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('profile_id', profile.id)
       .single()
 
@@ -188,7 +193,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('work_experiences')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('profile_id', profile.id)
 
     if (error) {

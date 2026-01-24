@@ -6,7 +6,7 @@ import { generateUniqueSlug, isValidSlug } from '@/lib/utils/slug'
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireMentee()
@@ -20,6 +20,7 @@ export async function PUT(
     }
 
     const { slug, regenerate } = await request.json()
+    const { id } = await params
 
     const supabase = await createClient()
 
@@ -27,7 +28,7 @@ export async function PUT(
     const { data: goal, error: goalError } = await supabase
       .from('goals')
       .select('id, title, profile_id')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (goalError || !goal) {
@@ -53,7 +54,7 @@ export async function PUT(
           .from('goals')
           .select('id')
           .eq('public_slug', s)
-          .neq('id', params.id)
+          .neq('id', id)
           .single()
         return !data
       })
@@ -72,7 +73,7 @@ export async function PUT(
         .from('goals')
         .select('id')
         .eq('public_slug', slug)
-        .neq('id', params.id)
+        .neq('id', id)
         .single()
 
       if (existing) {
@@ -92,7 +93,7 @@ export async function PUT(
     const { data: updatedGoal, error: updateError } = await supabase
       .from('goals')
       .update({ public_slug: newSlug })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
@@ -116,7 +117,7 @@ export async function PUT(
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { searchParams } = new URL(request.url)
@@ -129,6 +130,7 @@ export async function GET(
       )
     }
 
+    const { id } = await params
     const supabase = await createClient()
 
     // Check if slug is available (excluding current goal)
@@ -136,7 +138,7 @@ export async function GET(
       .from('goals')
       .select('id')
       .eq('public_slug', slug)
-      .neq('id', params.id)
+      .neq('id', id)
       .single()
 
     return NextResponse.json({
