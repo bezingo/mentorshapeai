@@ -422,14 +422,14 @@ export async function POST(
 
     // Auto-create Zoom meeting if mentor has Zoom connected
     let zoomMeeting = null
-    const mentorProfile = collaboration.mentor_profile as { display_name?: string } | null
+    const mentorProfileForZoom = collaboration.mentor_profile as { display_name?: string } | null
     const menteeProfile = collaboration.mentee_profile as { display_name?: string } | null
 
     try {
       const zoomClient = await getZoomClient(collaboration.mentor_profile_id)
 
       if (zoomClient) {
-        const mentorName = mentorProfile?.display_name || 'Mentor'
+        const mentorName = mentorProfileForZoom?.display_name || 'Mentor'
         const menteeName = menteeProfile?.display_name || 'Mentee'
 
         zoomMeeting = await createZoomMeeting(zoomClient, {

@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { getCurrentProfile, requireMentee } from '@/lib/clerk'
 import { createServiceClient } from '@/lib/supabase/service'
 import { addMemoryResource } from '@/lib/ai/goal-context-builder'
-import { parsePDF } from '@/lib/pdf-parser'
+import { extractTextFromPDF } from '@/lib/pdf-parser'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -83,8 +83,7 @@ export async function POST(req: NextRequest) {
     
     if (file.type === 'application/pdf') {
       try {
-        const buffer = await file.arrayBuffer()
-        const pdfText = await parsePDF(Buffer.from(buffer))
+        const pdfText = await extractTextFromPDF(file)
         extractedText = pdfText
       } catch (error) {
         console.error('PDF parsing error:', error)
