@@ -284,7 +284,11 @@ export async function gatherCompletionContext(goalId: string): Promise<Completio
     throw new Error(`Goal not found: ${goalError?.message || 'Unknown error'}`)
   }
 
-  const menteeProfile = goal.profile as { id: string; display_name: string }
+  const menteeProfile = Array.isArray(goal.profile) ? goal.profile[0] : goal.profile
+  
+  if (!menteeProfile) {
+    throw new Error('Profile not found for goal')
+  }
 
   // Fetch collaboration (if exists)
   const { data: collaboration } = await supabase
@@ -305,7 +309,9 @@ export async function gatherCompletionContext(goalId: string): Promise<Completio
     .limit(1)
     .single()
 
-  const mentorProfile = collaboration?.mentor_profile as { id: string; display_name: string } | null
+  const mentorProfile = collaboration?.mentor_profile
+    ? (Array.isArray(collaboration.mentor_profile) ? collaboration.mentor_profile[0] : collaboration.mentor_profile)
+    : null
 
   // Fetch milestones
   const { data: milestones } = await supabase
@@ -334,7 +340,12 @@ export async function gatherCompletionContext(goalId: string): Promise<Completio
       id: f.id,
       scheduled_at: f.scheduled_at,
       status: f.status,
-      summary: (f.focus_summaries as { summary: string } | null)?.summary || null,
+      summary: (() => {
+        const summaries = f.focus_summaries
+        if (!summaries) return null
+        const summaryObj = Array.isArray(summaries) ? summaries[0] : summaries
+        return summaryObj?.summary || null
+      })(),
     }))
   }
 

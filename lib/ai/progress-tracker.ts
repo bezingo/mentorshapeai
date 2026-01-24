@@ -257,7 +257,7 @@ export async function gatherProgressContext(collaborationId: string): Promise<Pr
     throw new Error(`Collaboration not found: ${collabError?.message || 'Unknown error'}`)
   }
 
-  const goal = collaboration.goal as {
+  const goal = (Array.isArray(collaboration.goal) ? collaboration.goal[0] : collaboration.goal) as {
     id: string
     title: string
     description: string | null
@@ -265,13 +265,17 @@ export async function gatherProgressContext(collaborationId: string): Promise<Pr
     success_definition: string | null
     duration_days: number
     created_at: string
-  }
+  } | null
 
-  const mentorProfile = collaboration.mentor_profile as { id: string; display_name: string }
-  const menteeProfile = collaboration.mentee_profile as { id: string; display_name: string }
+  const mentorProfile = (Array.isArray(collaboration.mentor_profile) ? collaboration.mentor_profile[0] : collaboration.mentor_profile) as { id: string; display_name: string } | null
+  const menteeProfile = (Array.isArray(collaboration.mentee_profile) ? collaboration.mentee_profile[0] : collaboration.mentee_profile) as { id: string; display_name: string } | null
 
   if (!goal) {
     throw new Error('Goal not found for collaboration')
+  }
+
+  if (!mentorProfile || !menteeProfile) {
+    throw new Error('Profile information missing for collaboration')
   }
 
   // Fetch milestones for the goal

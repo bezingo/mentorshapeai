@@ -70,12 +70,9 @@ export async function POST(
     }
 
     // Verify user has access through the collaboration
-    const collaboration = focus.collaboration as {
-      id: string
-      mentor_profile_id: string
-      mentee_profile_id: string
-      status: string
-    }
+    const collaboration = Array.isArray(focus.collaboration)
+      ? focus.collaboration[0]
+      : focus.collaboration
 
     if (!collaboration) {
       return NextResponse.json(

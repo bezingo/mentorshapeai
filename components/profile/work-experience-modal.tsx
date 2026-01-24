@@ -26,7 +26,7 @@ const workExperienceSchema = z.object({
   start_date: z.string().min(1, 'Start date is required'),
   end_date: z.string().optional().nullable(),
   description: z.string().max(2000).optional().nullable(),
-  is_current: z.boolean().default(false),
+  is_current: z.boolean(),
 }).refine(
   (data) => {
     if (data.is_current) return true

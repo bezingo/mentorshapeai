@@ -91,10 +91,14 @@ export async function notionExport(
       children: pageContent
     } as any)
     
+    // Construct Notion page URL from the ID
+    const responsePageId = response.id.replace(/-/g, '')
+    const notionUrl = `https://notion.so/${responsePageId}`
+    
     return {
       success: true,
       message: 'Successfully exported goal to Notion',
-      notionUrl: response.url,
+      notionUrl,
       pageId: response.id
     }
   } catch (error) {

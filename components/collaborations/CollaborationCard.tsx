@@ -123,7 +123,7 @@ export function CollaborationCard({
               {otherPerson?.avatar_url && (
                 <AvatarImage src={otherPerson.avatar_url} alt={otherPerson.display_name || ''} />
               )}
-              <AvatarFallback>{getInitials(otherPerson?.display_name)}</AvatarFallback>
+              <AvatarFallback>{getInitials(otherPerson?.display_name ?? null)}</AvatarFallback>
             </Avatar>
             <div className="min-w-0">
               <p className="font-medium truncate">{otherPerson?.display_name || 'Unknown User'}</p>

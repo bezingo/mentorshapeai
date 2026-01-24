@@ -76,12 +76,12 @@ export default function MentorAvailabilityPage() {
   const handleSaveSlots = useCallback(async (newSlots: TimeSlot[], newTimezone: string) => {
     // Get existing slot IDs (non-temp IDs)
     const existingIds = slots
-      .filter(s => !s.id.startsWith('temp-'))
+      .filter(s => s.id && !s.id.startsWith('temp-'))
       .map(s => s.id)
 
     // Determine slots to create, update, and delete
-    const slotsToCreate = newSlots.filter(s => s.id.startsWith('temp-'))
-    const slotsToUpdate = newSlots.filter(s => !s.id.startsWith('temp-') && existingIds.includes(s.id))
+    const slotsToCreate = newSlots.filter(s => s.id && s.id.startsWith('temp-'))
+    const slotsToUpdate = newSlots.filter(s => s.id && !s.id.startsWith('temp-') && existingIds.includes(s.id))
     const idsToDelete = existingIds.filter(id => !newSlots.find(s => s.id === id))
 
     // Create new slots
@@ -224,12 +224,9 @@ export default function MentorAvailabilityPage() {
       <div className="max-w-md">
         {calendarConnection ? (
           <CalendarConnectionStatus
-            connection={{
-              provider: calendarConnection.provider,
-              calendarId: calendarConnection.calendar_id,
-              lastSyncAt: calendarConnection.last_sync_at,
-              connectedAt: calendarConnection.connected_at,
-            }}
+            isConnected={true}
+            calendarEmail={calendarConnection.calendar_id}
+            lastSyncAt={calendarConnection.last_sync_at}
             onDisconnect={handleDisconnect}
             onSync={handleRefreshBusy}
           />

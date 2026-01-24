@@ -24,7 +24,7 @@ const educationSchema = z.object({
   degree: z.string().min(1, 'Degree/Field of study is required').max(200),
   start_date: z.string().min(1, 'Start date is required'),
   end_date: z.string().optional().nullable(),
-  is_current: z.boolean().default(false),
+  is_current: z.boolean(),
 }).refine(
   (data) => {
     if (data.is_current) return true

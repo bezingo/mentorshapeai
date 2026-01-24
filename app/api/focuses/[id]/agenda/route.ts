@@ -52,15 +52,14 @@ export async function GET(
       )
     }
 
-    // Verify user has access through the collaboration
-    const collaboration = focus.collaboration as {
-      mentor_profile_id: string
-      mentee_profile_id: string
-    }
+    // Verify user has access
+    const collaboration = Array.isArray(focus.collaboration)
+      ? focus.collaboration[0]
+      : focus.collaboration
 
     if (!collaboration) {
       return NextResponse.json(
-        { error: { code: 'NOT_FOUND', message: 'Associated collaboration not found' } },
+        { error: { code: 'NOT_FOUND', message: 'Collaboration not found' } },
         { status: 404 }
       )
     }
@@ -186,14 +185,13 @@ export async function PATCH(
       )
     }
 
-    const collaboration = focus.collaboration as {
-      mentor_profile_id: string
-      mentee_profile_id: string
-    }
+    const collaboration = Array.isArray(focus.collaboration)
+      ? focus.collaboration[0]
+      : focus.collaboration
 
     if (!collaboration) {
       return NextResponse.json(
-        { error: { code: 'NOT_FOUND', message: 'Associated collaboration not found' } },
+        { error: { code: 'NOT_FOUND', message: 'Collaboration not found' } },
         { status: 404 }
       )
     }

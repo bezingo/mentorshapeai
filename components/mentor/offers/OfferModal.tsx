@@ -64,7 +64,6 @@ const offerFormSchema = z.object({
     .string()
     .max(2000, 'Description must be 2000 characters or less')
     .nullable()
-    .optional()
     .transform(val => val || null),
   price_cents: z
     .number()
@@ -72,7 +71,7 @@ const offerFormSchema = z.object({
     .min(0, 'Price cannot be negative')
     .nullable()
     .optional(),
-  currency: z.string().length(3, 'Invalid currency').default('usd'),
+  currency: z.string().length(3, 'Invalid currency'),
   duration_minutes: z
     .number()
     .int()

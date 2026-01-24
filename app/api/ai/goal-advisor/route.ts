@@ -103,11 +103,10 @@ export async function POST(req: Request) {
         ...chatMessages
       ],
       temperature: 0.7,
-      maxTokens: 2000,
       tools: {
         refineGoal: tool({
           description: 'Refine specific aspects of the goal using AI Goal Shaper. Use when user wants to improve clarity, milestones, success criteria, or questions for mentors.',
-          parameters: z.object({
+          inputSchema: z.object({
             aspects: z.array(z.enum([
               'statement',
               'milestones',
@@ -117,7 +116,7 @@ export async function POST(req: Request) {
               'all'
             ])).describe('Which aspects to refine')
           }),
-          execute: async ({ aspects }) => {
+          execute: async ({ aspects }: { aspects: string[] }) => {
             const result = await refineGoalAspects(goalId, aspects)
             return result
           }
@@ -125,10 +124,10 @@ export async function POST(req: Request) {
         
         analyzeGoal: tool({
           description: 'Run strategic analysis on the goal. SWOT provides Strengths, Weaknesses, Opportunities, Threats. SMART checks if goal is Specific, Measurable, Achievable, Relevant, Time-bound.',
-          parameters: z.object({
+          inputSchema: z.object({
             type: z.enum(['swot', 'smart']).describe('Type of analysis')
           }),
-          execute: async ({ type }) => {
+          execute: async ({ type }: { type: 'swot' | 'smart' }) => {
             const result = await analyzeGoal(goalId, type)
             return result
           }
@@ -136,12 +135,12 @@ export async function POST(req: Request) {
         
         bookCalendar: tool({
           description: 'Schedule a calendar event with a mentor via Pipedream integration.',
-          parameters: z.object({
+          inputSchema: z.object({
             mentorEmail: z.string().email().describe('Email address of the mentor'),
             datetime: z.string().describe('ISO 8601 datetime for the meeting'),
             duration: z.number().describe('Duration in minutes')
           }),
-          execute: async (params) => {
+          execute: async (params: { mentorEmail: string; datetime: string; duration: number }) => {
             const result = await bookCalendar({
               goalId,
               ...params
@@ -152,10 +151,10 @@ export async function POST(req: Request) {
         
         exportToNotion: tool({
           description: 'Export goal to Notion workspace. Creates a formatted page with goal details.',
-          parameters: z.object({
+          inputSchema: z.object({
             pageId: z.string().default('').describe('Notion page ID (empty for default location)')
           }),
-          execute: async ({ pageId }) => {
+          execute: async ({ pageId }: { pageId: string }) => {
             const result = await exportGoalToNotion(goalId, pageId || undefined)
             return result
           }
@@ -163,10 +162,10 @@ export async function POST(req: Request) {
         
         exportToGoogleDocs: tool({
           description: 'Export goal to Google Docs. Creates a formatted document with goal details.',
-          parameters: z.object({
+          inputSchema: z.object({
             folderId: z.string().default('').describe('Google Drive folder ID (empty for default)')
           }),
-          execute: async ({ folderId }) => {
+          execute: async ({ folderId }: { folderId: string }) => {
             const result = await exportGoalToGoogleDocs(goalId, folderId || undefined)
             return result
           }
@@ -174,10 +173,10 @@ export async function POST(req: Request) {
         
         searchMemory: tool({
           description: 'Search through attached files and links in this conversation.',
-          parameters: z.object({
+          inputSchema: z.object({
             query: z.string().describe('Search query to find in attached resources')
           }),
-          execute: async ({ query }) => {
+          execute: async ({ query }: { query: string }) => {
             const result = await searchMemory(conversationId, query)
             return result
           }
@@ -185,10 +184,10 @@ export async function POST(req: Request) {
         
         findMentors: tool({
           description: 'Find matching mentors based on skills and expertise. [Coming Soon]',
-          parameters: z.object({
+          inputSchema: z.object({
             skills: z.array(z.string()).describe('Skills or expertise areas to match')
           }),
-          execute: async ({ skills }) => {
+          execute: async ({ skills }: { skills: string[] }) => {
             const result = await findMentors(goalId, skills)
             return result
           }

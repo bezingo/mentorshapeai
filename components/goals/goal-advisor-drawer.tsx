@@ -213,20 +213,6 @@ export function GoalAdvisorDrawer({ goalId, goalTitle }: GoalAdvisorDrawerProps)
                   )}
                 >
                   <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                  
-                  {/* Show tool calls if any */}
-                  {message.toolInvocations && message.toolInvocations.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      {message.toolInvocations.map((tool: any, idx: number) => (
-                        <div key={idx} className="text-xs opacity-70 flex items-center gap-1">
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                          <span>
-                            {tool.state === 'result' ? '✓' : '...'} {tool.toolName}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             ))}

@@ -22,7 +22,7 @@ export function HandleStep() {
   } | null>(null)
   const [suggestions, setSuggestions] = useState<string[]>([])
   
-  const debounceTimerRef = useRef<NodeJS.Timeout>()
+  const debounceTimerRef = useRef<NodeJS.Timeout | undefined>(undefined)
   const handle = formData.handle || ''
 
   // Check handle availability with debounce

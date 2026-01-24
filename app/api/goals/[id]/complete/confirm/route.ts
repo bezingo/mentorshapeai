@@ -89,11 +89,15 @@ export async function POST(
       )
     }
 
-    const collaboration = completion.collaboration as {
-      id: string
-      mentor_profile_id: string
-      mentee_profile_id: string
-      status: string
+    const collaboration = Array.isArray(completion.collaboration)
+      ? completion.collaboration[0]
+      : completion.collaboration
+
+    if (!collaboration) {
+      return NextResponse.json(
+        { error: { code: 'NOT_FOUND', message: 'Collaboration not found' } },
+        { status: 404 }
+      )
     }
 
     // Verify the user is the mentor for this collaboration

@@ -96,7 +96,7 @@ export async function POST(request: Request) {
     const hasEducations = (parsedData.educations || []).length > 0
     const hasSkills = (parsedData.skills || []).length > 0
 
-    parsedData._metadata = {
+    const metadata = {
       available: {
         basic: true,
         positions: hasWorkExperiences,
@@ -115,7 +115,7 @@ export async function POST(request: Request) {
     // Return structured data for review (NOT auto-saved)
     return NextResponse.json({
       data: {
-        parsed: parsedData,
+        parsed: { ...parsedData, _metadata: metadata },
         message: 'LinkedIn profile scraped successfully. Review and select which sections to import.',
       },
     })

@@ -89,9 +89,9 @@ export default async function GoalDetailPage({
           </Button>
           <DeleteGoalButton
             goalId={goal.id}
-            hasActiveCollaborations={
+            hasActiveCollaborations={Boolean(
               collaborations && collaborations.some((c: any) => c.status === 'pending' || c.status === 'active')
-            }
+            )}
           />
         </div>
       </div>

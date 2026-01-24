@@ -114,6 +114,12 @@ export async function ensureUserAndProfile() {
     }
   }
 
+  // Ensure we have a user at this point
+  if (!user) {
+    console.error('User not found after initialization')
+    return null
+  }
+
   // Check if profile exists
   let { data: profile, error: profileError } = await supabase
     .from('profiles')

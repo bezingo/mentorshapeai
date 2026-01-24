@@ -191,7 +191,12 @@ async function runSWOTAnalysis(goal: any, milestones: any[], supabase: any) {
   // For now, use simple logic-based SWOT
   // Can be enhanced with LangChain later
   
-  const analysis = {
+  const analysis: {
+    strengths: string[]
+    weaknesses: string[]
+    opportunities: string[]
+    threats: string[]
+  } = {
     strengths: [],
     weaknesses: [],
     opportunities: [],

@@ -174,7 +174,7 @@ export function MentorRequestsList({ requests: initialRequests, onUpdate }: Ment
                       />
                     )}
                     <AvatarFallback className="text-sm">
-                      {getInitials(request.mentee_profile?.display_name)}
+                      {getInitials(request.mentee_profile?.display_name ?? null)}
                     </AvatarFallback>
                   </Avatar>
                   <div>

@@ -109,17 +109,17 @@ export function CollaborationTimeline({ events, className }: CollaborationTimeli
                 {/* Metadata preview */}
                 {event.metadata && Object.keys(event.metadata).length > 0 && (
                   <div className="mt-2 pt-2 border-t text-xs text-muted-foreground">
-                    {event.type === 'focus' && event.metadata.scheduled_at && (
+                    {event.type === 'focus' && event.metadata.scheduled_at ? (
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
                         {format(new Date(event.metadata.scheduled_at as string), 'PPp')}
                       </div>
-                    )}
-                    {event.type === 'check_in' && event.metadata.mood_rating && (
+                    ) : null}
+                    {event.type === 'check_in' && event.metadata.mood_rating ? (
                       <div className="flex items-center gap-1">
-                        Mood: {event.metadata.mood_rating}/5
+                        Mood: {String(event.metadata.mood_rating)}/5
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 )}
               </div>

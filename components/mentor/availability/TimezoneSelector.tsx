@@ -68,7 +68,7 @@ export function TimezoneSelector({
       }
     }
 
-    return result as typeof COMMON_TIMEZONES
+    return result
   }, [searchQuery])
 
   // Check if there are any results
@@ -133,7 +133,7 @@ export function TimezoneSelector({
             {Object.entries(filteredTimezones).map(([region, timezones]) => (
               <ComboboxGroup key={region}>
                 <ComboboxLabel>{region}</ComboboxLabel>
-                {timezones.map((tz) => (
+                {timezones.map((tz: string) => (
                   <ComboboxItem key={tz} value={tz}>
                     <div className="flex flex-col">
                       <span>{tz.replace(/_/g, ' ')}</span>

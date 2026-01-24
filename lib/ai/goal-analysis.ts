@@ -65,6 +65,7 @@ export interface MentorNotesInput {
   description?: string | null
   current_challenges?: string | null
   success_definition?: string | null
+  duration_days?: number
   milestones?: Array<{
     title: string
     description: string
@@ -209,9 +210,7 @@ export async function generateSWOTAnalysis(input: SWOTAnalysisInput): Promise<SW
     ['human', swotUserPromptTemplate],
   ])
 
-  const parser = new JsonOutputParser<SWOTAnalysis>({
-    strict: true,
-  })
+  const parser = new JsonOutputParser<SWOTAnalysis>()
   const chain = prompt.pipe(model).pipe(parser)
 
   try {
@@ -268,9 +267,7 @@ export async function generateSMARTFramework(input: SMARTFrameworkInput): Promis
     ['human', smartUserPromptTemplate],
   ])
 
-  const parser = new JsonOutputParser<SMARTFramework>({
-    strict: true,
-  })
+  const parser = new JsonOutputParser<SMARTFramework>()
   const chain = prompt.pipe(model).pipe(parser)
 
   try {

@@ -235,25 +235,23 @@ export async function gatherFocusContext(focusId: string): Promise<FocusPlannerI
     throw new Error(`Focus not found: ${focusError?.message || 'Unknown error'}`)
   }
 
-  const collaboration = focus.collaboration as {
-    id: string
-    mentor_profile_id: string
-    mentee_profile_id: string
-    goal: {
-      id: string
-      title: string
-      description: string | null
-      category: string | null
-      success_definition: string | null
-      duration_days: number
-      created_at: string
-    }
-    mentor_profile: { id: string; display_name: string }
-    mentee_profile: { id: string; display_name: string }
+  const rawCollaboration = Array.isArray(focus.collaboration) ? focus.collaboration[0] : focus.collaboration
+  
+  if (!rawCollaboration) {
+    throw new Error('Collaboration not found')
+  }
+
+  const collaboration = {
+    id: rawCollaboration.id,
+    mentor_profile_id: rawCollaboration.mentor_profile_id,
+    mentee_profile_id: rawCollaboration.mentee_profile_id,
+    goal: Array.isArray(rawCollaboration.goal) ? rawCollaboration.goal[0] : rawCollaboration.goal,
+    mentor_profile: Array.isArray(rawCollaboration.mentor_profile) ? rawCollaboration.mentor_profile[0] : rawCollaboration.mentor_profile,
+    mentee_profile: Array.isArray(rawCollaboration.mentee_profile) ? rawCollaboration.mentee_profile[0] : rawCollaboration.mentee_profile,
   }
 
   if (!collaboration?.goal) {
-    throw new Error('Collaboration or goal not found')
+    throw new Error('Goal not found')
   }
 
   // Fetch milestones for the goal

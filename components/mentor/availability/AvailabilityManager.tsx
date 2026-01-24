@@ -57,7 +57,7 @@ export function AvailabilityManager({
   useEffect(() => {
     const initialJSON = JSON.stringify(initialSlots)
     const currentJSON = JSON.stringify(slots)
-    setHasChanges(initialJSON !== currentJSON || (initialTimezone && timezone !== initialTimezone))
+    setHasChanges(initialJSON !== currentJSON || Boolean(initialTimezone && timezone !== initialTimezone))
   }, [slots, timezone, initialSlots, initialTimezone])
 
   // Clear messages after timeout

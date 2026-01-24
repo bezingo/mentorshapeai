@@ -73,10 +73,17 @@ export async function GET(
     }
 
     // Verify user has access (must be mentor or mentee of the collaboration)
-    const collaboration = actionItem.collaboration as {
-      mentor_profile_id: string
-      mentee_profile_id: string
+    const collaboration = Array.isArray(actionItem.collaboration)
+      ? actionItem.collaboration[0]
+      : actionItem.collaboration
+
+    if (!collaboration) {
+      return NextResponse.json(
+        { error: { code: 'NOT_FOUND', message: 'Collaboration not found' } },
+        { status: 404 }
+      )
     }
+
     const isMentor = collaboration.mentor_profile_id === profile.id
     const isMentee = collaboration.mentee_profile_id === profile.id
 
@@ -187,10 +194,17 @@ export async function PATCH(
     }
 
     // Verify user has access
-    const collaboration = actionItem.collaboration as {
-      mentor_profile_id: string
-      mentee_profile_id: string
+    const collaboration = Array.isArray(actionItem.collaboration)
+      ? actionItem.collaboration[0]
+      : actionItem.collaboration
+
+    if (!collaboration) {
+      return NextResponse.json(
+        { error: { code: 'NOT_FOUND', message: 'Collaboration not found' } },
+        { status: 404 }
+      )
     }
+
     const isMentor = collaboration.mentor_profile_id === profile.id
     const isMentee = collaboration.mentee_profile_id === profile.id
 
@@ -351,10 +365,17 @@ export async function DELETE(
     }
 
     // Verify user has access
-    const collaboration = actionItem.collaboration as {
-      mentor_profile_id: string
-      mentee_profile_id: string
+    const collaboration = Array.isArray(actionItem.collaboration)
+      ? actionItem.collaboration[0]
+      : actionItem.collaboration
+
+    if (!collaboration) {
+      return NextResponse.json(
+        { error: { code: 'NOT_FOUND', message: 'Collaboration not found' } },
+        { status: 404 }
+      )
     }
+
     const isMentor = collaboration.mentor_profile_id === profile.id
     const isMentee = collaboration.mentee_profile_id === profile.id
 

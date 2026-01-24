@@ -161,7 +161,16 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ received: true })
       }
 
-      const collaboration = focus.collaboration as { mentor_profile_id: string }
+      const collaboration = Array.isArray(focus.collaboration)
+      ? focus.collaboration[0]
+      : focus.collaboration
+
+    if (!collaboration) {
+      return NextResponse.json(
+        { error: { code: 'NOT_FOUND', message: 'Collaboration not found' } },
+        { status: 404 }
+      )
+    }
 
       // Get Zoom client for the mentor to fetch recording details
       const zoomClient = await getZoomClient(collaboration.mentor_profile_id)

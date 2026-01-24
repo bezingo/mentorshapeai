@@ -74,13 +74,13 @@ export function BrandfetchLogo({
   if (useNextImage) {
     return (
       <Image
+        {...(props as React.ComponentProps<typeof Image>)}
         src={logoUrl}
         alt={imgAlt}
         width={imgWidth}
         height={imgHeight}
         className={cn('object-contain', className)}
         unoptimized // Brandfetch CDN handles optimization
-        {...(props as React.ComponentProps<typeof Image>)}
       />
     )
   }

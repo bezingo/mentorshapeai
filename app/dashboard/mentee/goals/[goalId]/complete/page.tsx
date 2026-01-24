@@ -629,7 +629,7 @@ export default function GoalCompletionWizardPage({
         )}
         <Button
           onClick={handleSaveRating}
-          disabled={isSaving || (collaboration && rating === 0)}
+          disabled={isSaving || Boolean(collaboration && rating === 0)}
           className="flex-1"
         >
           {isSaving ? (
