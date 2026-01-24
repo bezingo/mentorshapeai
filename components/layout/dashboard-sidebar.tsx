@@ -45,8 +45,8 @@ const navItems: NavItem[] = [
     icon: Users,
   },
   {
-    title: 'Sessions',
-    href: '/dashboard/sessions',
+    title: 'Focuses',
+    href: '/dashboard/focuses',
     icon: Calendar,
   },
   {

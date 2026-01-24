@@ -65,7 +65,7 @@ export default async function DashboardPage() {
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-2">Collaborations</h2>
               <p className="text-sm text-muted-foreground mb-4">
-                View your mentoring relationships and sessions.
+                View your mentoring relationships and focus sessions.
               </p>
               <a
                 href="/dashboard/collaborations"

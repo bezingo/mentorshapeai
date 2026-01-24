@@ -24,29 +24,29 @@ Build the foundation for mentees to create profiles, set goals, and share them p
 
 Enable mentors to create public profiles and showcase their expertise.
 
-9. [ ] **Mentor Onboarding Flow** — Wizard for becoming a mentor including bio, expertise areas, skills, languages, timezone, years of experience, and public handle selection at `/m/[handle]` `S`
+9. [x] **Mentor Onboarding Flow** — Wizard for becoming a mentor including bio, expertise areas, skills, languages, timezone, years of experience, and public handle selection at `/m/[handle]` `S`
 
-10. [ ] **Public Mentor Profiles** — Linktree-style pages at `/m/[handle]` showcasing mentor info, expertise, skills, testimonials, badges, consultation offerings, digital products, and "Request Mentorship" button `M`
+10. [x] **Public Mentor Profiles** — Linktree-style pages at `/m/[handle]` showcasing mentor info, expertise, skills, testimonials, badges, consultation offerings, digital products, and "Request Mentorship" button `M`
 
-11. [ ] **Calendar Integration** — Connect Google Calendar and Microsoft Outlook APIs to sync availability and automatically block busy time slots `L`
+11. [x] **Calendar Integration** — Connect Google Calendar and Microsoft Outlook APIs to sync availability and automatically block busy time slots `L`
 
-12. [ ] **Mentor Availability Management** — Weekly availability template with day/time slots that respects calendar busy times for session booking `M`
+12. [x] **Mentor Availability Management** — Weekly availability template with day/time slots that respects calendar busy times for session booking `M`
 
-## Phase 3: Collaboration & Sessions
+## Phase 3: Collaboration & Focuses
 
-Enable mentor-mentee collaboration lifecycle and structured sessions.
+Enable mentor-mentee collaboration lifecycle and structured focus sessions.
 
 13. [ ] **Collaboration Lifecycle** — Complete collab flow from request to acceptance, including notifications, status tracking (pending/active/completed), and both-party approval `M`
 
-14. [ ] **Session Booking System** — Mentees select available time slots from mentor calendar, creating calendar events and focus session records in database `M`
+14. [ ] **Focus Booking System** — Mentees select available time slots from mentor calendar, creating calendar events and focus session records in database `M`
 
-15. [ ] **AI Session Planner Agent** — Pre-session AI agent generating agendas with topics to cover, questions to ask, review of previous actions, and preparation suggestions based on goal and previous sessions `M`
+15. [ ] **AI Focus Planner Agent** — Pre-focus AI agent generating agendas with topics to cover, questions to ask, review of previous actions, and preparation suggestions based on goal and previous focuses `M`
 
 16. [ ] **Video Meeting Integration** — Zoom API integration for creating meetings, fetching recordings, and extracting transcripts (Google Meet as alternative via Calendar) `L`
 
-17. [ ] **AI Transcript Summarizer Agent** — Post-session agent that processes transcripts to generate summaries, key decisions, action items for mentee & mentor, and milestone status updates `M`
+17. [ ] **AI Transcript Summarizer Agent** — Post-focus agent that processes transcripts to generate summaries, key decisions, action items for mentee & mentor, and milestone status updates `M`
 
-18. [ ] **Milestone Progress Tracking** — Visual dashboard showing milestone completion, session timeline, action items, blockers, and weekly check-ins (mood, progress notes) for mentees `M`
+18. [ ] **Milestone Progress Tracking** — Visual dashboard showing milestone completion, focus timeline, action items, blockers, and weekly check-ins (mood, progress notes) for mentees `M`
 
 19. [ ] **AI Progress Tracker Agent** — Weekly agent that scores progress (0-100), identifies stalled areas, predicts completion risk, and sends nudges to mentee/mentor `M`
 
@@ -120,8 +120,8 @@ The following AI agents are required for specific roadmap items:
 | Profile Builder | Item 2, 3 | LinkedIn URL, CV text | Structured JSON profile |
 | Goal Shaper | Item 5 | User goal, challenges, time horizon | Milestones, success criteria, SWOT/SMART analysis |
 | Goal Advisor | Item 6 | Conversation history, goal context, attachments | Streaming responses, tool calls, refined goals |
-| Session Planner | Item 15 | Goal summary, milestones, previous sessions | Agenda, questions, prep suggestions |
+| Focus Planner | Item 15 | Goal summary, milestones, previous focuses | Agenda, questions, prep suggestions |
 | Transcript Summarizer | Item 17 | Meeting transcript, agenda | Summary, action items, milestone updates |
-| Progress Tracker | Item 19 | Milestones, sessions, check-ins | Progress score, risk predictions, nudges |
+| Progress Tracker | Item 19 | Milestones, focuses, check-ins | Progress score, risk predictions, nudges |
 | Matching Agent | Item 29 | Mentor/mentee embeddings, skills, goals | Ranked matches with explanations |
-| Completion Agent | Item 20 | All sessions, goal data | Final summary, LinkedIn post |
+| Completion Agent | Item 20 | All focuses, goal data | Final summary, LinkedIn post |

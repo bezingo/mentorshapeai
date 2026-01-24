@@ -112,7 +112,7 @@ export default async function MentorDashboardPage() {
               Availability
             </CardTitle>
             <CardDescription>
-              Set your weekly availability for mentees to book sessions.
+              Set your weekly availability for mentees to book focus sessions.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

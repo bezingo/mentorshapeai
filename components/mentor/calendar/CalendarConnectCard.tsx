@@ -86,11 +86,11 @@ export function CalendarConnectCard({
         throw new Error(data.error || 'Failed to get authorization URL')
       }
 
-      if (data.data?.url) {
+      if (data.data?.auth_url) {
         // Call optional callback before redirect
         onConnect?.()
         // Redirect to Google OAuth
-        window.location.href = data.data.url
+        window.location.href = data.data.auth_url
       } else {
         throw new Error('No authorization URL returned')
       }

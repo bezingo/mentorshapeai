@@ -46,7 +46,7 @@ export default function PricingPage() {
                 <ul className="space-y-2 text-sm text-muted-foreground mb-6">
                   <li>• Unlimited goals</li>
                   <li>• AI-powered goal shaping</li>
-                  <li>• Session planning & summaries</li>
+                  <li>• Focus session planning & summaries</li>
                   <li>• Progress tracking</li>
                 </ul>
                 <Button className="w-full">Get Started</Button>

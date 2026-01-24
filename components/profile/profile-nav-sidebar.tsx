@@ -95,8 +95,8 @@ const navSections: NavSection[] = [
         disabled: true,
       },
       {
-        title: 'Sessions',
-        href: '/dashboard/profile/sessions',
+        title: 'Focuses',
+        href: '/dashboard/profile/focuses',
         icon: MonitorSmartphone,
         disabled: true,
       },

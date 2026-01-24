@@ -131,8 +131,8 @@ export function AvailabilityStep() {
     try {
       const response = await fetch('/api/mentor/calendar/auth-url')
       const data = await response.json()
-      if (data.data?.url) {
-        window.location.href = data.data.url
+      if (data.data?.auth_url) {
+        window.location.href = data.data.auth_url
       }
     } catch {
       // Calendar connection is optional, just log the error
@@ -145,7 +145,7 @@ export function AvailabilityStep() {
       <div>
         <h2 className="text-2xl font-semibold">Availability</h2>
         <p className="text-muted-foreground mt-1">
-          Set your weekly availability for mentoring sessions. You can always adjust
+          Set your weekly availability for focus sessions. You can always adjust
           this later.
         </p>
       </div>

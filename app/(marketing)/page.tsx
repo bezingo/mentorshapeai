@@ -56,7 +56,7 @@ export default async function LandingPage() {
             </h1>
             <p className="mt-6 text-lg leading-8 text-muted-foreground">
               Mentorshape helps you set clear goals, find expert mentors, and track your progress
-              through structured sessions and AI-guided insights.
+              through structured focus sessions and AI-guided insights.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               {userId ? (
@@ -102,9 +102,9 @@ export default async function LandingPage() {
                 </p>
               </div>
               <div className="flex flex-col gap-2">
-                <h3 className="text-lg font-semibold">Structured Sessions</h3>
+                <h3 className="text-lg font-semibold">Focus Sessions</h3>
                 <p className="text-sm text-muted-foreground">
-                  AI-generated agendas and summaries help you make the most of every session.
+                  AI-generated agendas and summaries help you make the most of every focus session.
                 </p>
               </div>
               <div className="flex flex-col gap-2">

@@ -257,7 +257,7 @@ export function AvailabilityManager({
         <Info className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
         <div className="text-muted-foreground">
           <p>
-            Set your weekly availability for mentoring sessions. Mentees will see
+            Set your weekly availability for focus sessions. Mentees will see
             these times converted to their local timezone.
           </p>
           {calendarConnected && (

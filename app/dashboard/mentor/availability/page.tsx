@@ -215,7 +215,7 @@ export default function MentorAvailabilityPage() {
           </Button>
           <h1 className="text-3xl font-bold">Availability</h1>
           <p className="text-muted-foreground">
-            Set your weekly availability for mentees to book sessions.
+            Set your weekly availability for mentees to book focus sessions.
           </p>
         </div>
       </div>

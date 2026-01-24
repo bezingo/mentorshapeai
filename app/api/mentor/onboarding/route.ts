@@ -158,7 +158,18 @@ export async function POST() {
       // Merge with any existing skills in formData
       const existingSkills = (formData.skills as string[]) || []
       const dbSkills = skillsData.map((s) => s.name)
-      formData.skills = [...new Set([...existingSkills, ...dbSkills])]
+      // Limit to 20 skills max to pass validation
+      formData.skills = [...new Set([...existingSkills, ...dbSkills])].slice(0, 20)
+    }
+
+    // Also limit expertise_areas to 10 max
+    if (formData.expertise_areas && Array.isArray(formData.expertise_areas)) {
+      formData.expertise_areas = (formData.expertise_areas as string[]).slice(0, 10)
+    }
+
+    // Also limit languages to 10 max
+    if (formData.languages && Array.isArray(formData.languages)) {
+      formData.languages = (formData.languages as string[]).slice(0, 10)
     }
 
     // Create onboarding record
