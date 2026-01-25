@@ -45,7 +45,7 @@
     "langchain": "^0.3.0",
     "lucide-react": "^0.556.0",
     "mammoth": "^1.11.0",
-    "next": "16.0.7",
+    "next": "16.0.10",
     "openai": "^4.70.0",
     "pdf-parse": "^2.4.5",
     "radix-ui": "^1.4.3",
