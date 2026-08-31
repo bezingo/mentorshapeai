@@ -27,6 +27,7 @@ export default async function PublicGoalPage({
     `)
     .eq('public_slug', slug)
     .eq('status', 'active')
+    .eq('is_public', true)
     .single()
 
   if (error || !goal) {

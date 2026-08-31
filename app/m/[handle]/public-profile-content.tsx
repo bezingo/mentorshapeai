@@ -55,6 +55,7 @@ interface Profile {
   work_history_public: boolean
   education_public: boolean
   skills_public: boolean
+  invite_only: boolean
   updated_at: string | null
 }
 
@@ -483,8 +484,8 @@ function MentorProfileContent({
           )}
         </div>
 
-        {/* Sticky Request Mentorship CTA - Only show for visitors */}
-        {!isOwnProfile && (
+        {/* Sticky Request Mentorship CTA - Only show for visitors if not invite_only */}
+        {!isOwnProfile && !profile.invite_only && (
           <div className="mt-8 pt-6 border-t sticky bottom-0 bg-background pb-4">
             <Button
               onClick={handleRequestMentorship}
@@ -493,6 +494,17 @@ function MentorProfileContent({
             >
               Request Mentorship
             </Button>
+          </div>
+        )}
+
+        {/* Invite-only notice for visitors */}
+        {!isOwnProfile && profile.invite_only && (
+          <div className="mt-8 pt-6 border-t">
+            <div className="text-center p-4 bg-muted rounded-lg">
+              <p className="text-muted-foreground">
+                This mentor accepts collaborations by invitation only.
+              </p>
+            </div>
           </div>
         )}
 
@@ -782,8 +794,8 @@ function RegularProfileContent({
           )}
         </div>
 
-        {/* Request Mentorship CTA - Only show for visitors (not own profile) */}
-        {!isOwnProfile && (
+        {/* Request Mentorship CTA - Only show for visitors if not invite_only */}
+        {!isOwnProfile && !profile.invite_only && (
           <div className="mt-8 pt-6 border-t">
             <Button
               asChild
@@ -794,6 +806,17 @@ function RegularProfileContent({
                 Request Mentorship
               </Link>
             </Button>
+          </div>
+        )}
+
+        {/* Invite-only notice for visitors */}
+        {!isOwnProfile && profile.invite_only && (
+          <div className="mt-8 pt-6 border-t">
+            <div className="text-center p-4 bg-muted rounded-lg">
+              <p className="text-muted-foreground">
+                This mentor accepts collaborations by invitation only.
+              </p>
+            </div>
           </div>
         )}
 

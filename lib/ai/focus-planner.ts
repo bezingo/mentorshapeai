@@ -47,6 +47,16 @@ export type AgendaQuestion = z.infer<typeof AgendaQuestionSchema>
 export type PreviousActionItem = z.infer<typeof PreviousActionItemSchema>
 
 /**
+ * Focus grade from previous session
+ */
+interface FocusGrade {
+  grader_role: 'mentor' | 'mentee'
+  usefulness_rating: number
+  honesty_rating: number
+  feedback: string | null
+}
+
+/**
  * Input data gathered for focus planner context
  */
 export interface FocusPlannerInput {
@@ -95,6 +105,7 @@ export interface FocusPlannerInput {
     wins: string | null
     week_start: string
   }>
+  lastFocusGrades: FocusGrade[]
   lastFocusDate: string | null
   menteeDisplayName: string
   mentorDisplayName: string
@@ -116,7 +127,12 @@ Guidelines for creating effective agendas:
 7. PREPARATION TIPS should be concrete actions the mentee can take before the session
 8. If there are outstanding action items, they should be reviewed early in the session
 9. Consider the mentee's recent mood and blockers when planning the session tone
-10. Aim for 3-4 main topics that fit within the session duration`
+10. Aim for 3-4 main topics that fit within the session duration
+11. GRADES from the previous session provide important context:
+    - Low usefulness (1-2) suggests the previous session didn't meet needs - address this
+    - Low honesty (1-2) suggests communication barriers - plan for a more open discussion
+    - If one party's grade is missing, note this as a pending action
+    - High grades mean the format is working well - continue the approach`
 
 /**
  * User prompt template for generating focus agenda
@@ -147,6 +163,9 @@ const userPromptTemplate = `Generate a focus session agenda based on the followi
 
 **RECENT CHECK-INS:**
 {check_ins_text}
+
+**LAST FOCUS GRADES:**
+{grades_text}
 
 **PARTICIPANTS:**
 - Mentee: {mentee_name}
@@ -317,16 +336,32 @@ export async function gatherFocusContext(focusId: string): Promise<FocusPlannerI
     .order('week_start', { ascending: false })
     .limit(4)
 
-  // Get last focus date
+  // Get last focus and its grades
   const { data: lastFocus } = await supabase
     .from('focuses')
-    .select('scheduled_at')
+    .select('id, scheduled_at')
     .eq('collaboration_id', collaboration.id)
     .eq('status', 'completed')
     .neq('id', focusId)
     .order('scheduled_at', { ascending: false })
     .limit(1)
     .single()
+
+  // Fetch grades from the last focus if it exists
+  let lastFocusGrades: FocusGrade[] = []
+  if (lastFocus?.id) {
+    const { data: grades } = await supabase
+      .from('focus_grades')
+      .select('grader_role, usefulness_rating, honesty_rating, feedback')
+      .eq('focus_id', lastFocus.id)
+
+    lastFocusGrades = (grades || []).map((g) => ({
+      grader_role: g.grader_role as 'mentor' | 'mentee',
+      usefulness_rating: g.usefulness_rating,
+      honesty_rating: g.honesty_rating,
+      feedback: g.feedback,
+    }))
+  }
 
   return {
     focus: {
@@ -339,6 +374,7 @@ export async function gatherFocusContext(focusId: string): Promise<FocusPlannerI
     previousFocusSummaries,
     outstandingActionItems,
     recentCheckIns: checkIns || [],
+    lastFocusGrades,
     lastFocusDate: lastFocus?.scheduled_at || null,
     menteeDisplayName: collaboration.mentee_profile.display_name,
     mentorDisplayName: collaboration.mentor_profile.display_name,
@@ -395,6 +431,30 @@ function formatContextForPrompt(input: FocusPlannerInput): Record<string, string
         .join('\n')
     : 'No recent check-ins'
 
+  // Format grades from last focus
+  let gradesText = 'First session (no previous grades)'
+  if (input.lastFocusDate) {
+    const mentorGrade = input.lastFocusGrades.find((g) => g.grader_role === 'mentor')
+    const menteeGrade = input.lastFocusGrades.find((g) => g.grader_role === 'mentee')
+
+    if (mentorGrade || menteeGrade) {
+      const gradeLines: string[] = []
+      if (mentorGrade) {
+        gradeLines.push(`Mentor: Usefulness ${mentorGrade.usefulness_rating}/5, Honesty ${mentorGrade.honesty_rating}/5${mentorGrade.feedback ? ` - "${mentorGrade.feedback}"` : ''}`)
+      } else {
+        gradeLines.push('Mentor: Grade pending')
+      }
+      if (menteeGrade) {
+        gradeLines.push(`Mentee: Usefulness ${menteeGrade.usefulness_rating}/5, Honesty ${menteeGrade.honesty_rating}/5${menteeGrade.feedback ? ` - "${menteeGrade.feedback}"` : ''}`)
+      } else {
+        gradeLines.push('Mentee: Grade pending')
+      }
+      gradesText = gradeLines.join('\n')
+    } else {
+      gradesText = 'No grades submitted for last session (both pending)'
+    }
+  }
+
   return {
     duration_minutes: input.focus.duration_minutes,
     scheduled_at: new Date(input.focus.scheduled_at).toLocaleDateString('en-US', {
@@ -419,6 +479,7 @@ function formatContextForPrompt(input: FocusPlannerInput): Record<string, string
     action_item_count: input.outstandingActionItems.length,
     action_items_text: actionItemsText,
     check_ins_text: checkInsText,
+    grades_text: gradesText,
     mentee_name: input.menteeDisplayName,
     mentor_name: input.mentorDisplayName,
   }

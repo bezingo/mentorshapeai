@@ -38,6 +38,8 @@ interface Profile {
   work_history_public: boolean
   education_public: boolean
   skills_public: boolean
+  // Mentor settings
+  invite_only: boolean
   // Timestamps
   updated_at: string | null
 }
