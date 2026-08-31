@@ -18,10 +18,10 @@ describe.skipIf(!shouldRunAITests)('Goal Shaper Agent', () => {
   describe('Test 1: Agent expands simple goal into milestones (30-day goal)', () => {
     it('should generate 3-4 milestones for a 30-day goal', async () => {
       const input: GoalShapingInput = {
-        title: 'Learn React',
+        title: 'Learn Financial Planning',
         duration_days: 30,
-        current_challenges: 'No prior JavaScript experience',
-        category: 'Learning',
+        current_challenges: 'No prior finance experience',
+        category: 'Finance',
       }
 
       const result = await shapeGoal(input)
@@ -59,7 +59,7 @@ describe.skipIf(!shouldRunAITests)('Goal Shaper Agent', () => {
         title: 'Build a SaaS product and launch MVP',
         duration_days: 60,
         current_challenges: 'Limited technical skills, no marketing experience',
-        category: 'Startup',
+        category: 'Entrepreneurship',
         description: 'Want to build a project management tool for remote teams',
       }
 
@@ -101,10 +101,10 @@ describe.skipIf(!shouldRunAITests)('Goal Shaper Agent', () => {
   describe('Test 4: Agent handles missing challenges gracefully', () => {
     it('should work with empty challenges string', async () => {
       const input: GoalShapingInput = {
-        title: 'Run a marathon',
+        title: 'Develop a healthy morning routine',
         duration_days: 60,
         current_challenges: '', // Empty string
-        category: 'Fitness',
+        category: 'Personal Growth',
       }
 
       const result = await shapeGoal(input)
@@ -117,9 +117,9 @@ describe.skipIf(!shouldRunAITests)('Goal Shaper Agent', () => {
 
     it('should work without challenges field', async () => {
       const input: GoalShapingInput = {
-        title: 'Learn Spanish',
+        title: 'Improve public speaking skills',
         duration_days: 30,
-        category: 'Learning',
+        category: 'Personal Growth',
       }
 
       const result = await shapeGoal(input)
@@ -158,12 +158,12 @@ describe.skipIf(!shouldRunAITests)('Goal Shaper Agent', () => {
       ).toBe(true)
     }, 60000)
 
-    it('should generate category-specific milestones for Fitness goals', async () => {
+    it('should generate category-specific milestones for Entrepreneurship goals', async () => {
       const input: GoalShapingInput = {
-        title: 'Lose 20 pounds',
+        title: 'Launch an online business',
         duration_days: 60,
-        category: 'Fitness',
-        current_challenges: 'Busy schedule, inconsistent exercise',
+        category: 'Entrepreneurship',
+        current_challenges: 'No startup experience, limited network',
       }
 
       const result = await shapeGoal(input)
@@ -175,13 +175,13 @@ describe.skipIf(!shouldRunAITests)('Goal Shaper Agent', () => {
         .join(' ')
         .toLowerCase()
 
-      // Should contain fitness-related terms
+      // Should contain entrepreneurship-related terms
       expect(
-        milestoneTexts.includes('exercise') ||
-          milestoneTexts.includes('workout') ||
-          milestoneTexts.includes('diet') ||
-          milestoneTexts.includes('weight') ||
-          milestoneTexts.includes('fitness')
+        milestoneTexts.includes('business') ||
+          milestoneTexts.includes('launch') ||
+          milestoneTexts.includes('market') ||
+          milestoneTexts.includes('customer') ||
+          milestoneTexts.includes('product')
       ).toBe(true)
     }, 60000)
   })
@@ -191,7 +191,7 @@ describe.skipIf(!shouldRunAITests)('Goal Shaper Agent', () => {
       const input: GoalShapingInput = {
         title: 'Start a side business',
         duration_days: 60,
-        category: 'Startup',
+        category: 'Entrepreneurship',
         description: 'Want to build a consulting practice',
       }
 

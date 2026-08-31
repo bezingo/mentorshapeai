@@ -438,7 +438,7 @@ export async function POST(
           duration: duration_minutes,
           timezone: (collaboration.mentor_profile as { timezone?: string } | null)?.timezone || 'UTC',
           settings: {
-            auto_recording: 'cloud',
+            auto_recording: 'none',
             join_before_host: true,
             waiting_room: false,
           },

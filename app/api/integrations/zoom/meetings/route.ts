@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
       duration,
       timezone,
       settings: {
-        auto_recording: 'cloud',
+        auto_recording: 'none',
         join_before_host: true,
         waiting_room: false,
       },

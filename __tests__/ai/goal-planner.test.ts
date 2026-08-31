@@ -41,9 +41,9 @@ vi.mock('@langchain/openai', () => {
         } else if (userMessage.toLowerCase().includes('career')) {
           title = 'Advance Career'
           category = 'Career'
-        } else if (userMessage.toLowerCase().includes('fitness')) {
-          title = 'Get Fit'
-          category = 'Fitness'
+        } else if (userMessage.toLowerCase().includes('finance')) {
+          title = 'Master Finance'
+          category = 'Finance'
         }
 
         // Extract duration
@@ -198,10 +198,10 @@ describe.skipIf(!shouldRunAITests)('Goal Planner Agent', () => {
 
   it('should convert planning state to goal input correctly', () => {
     const state = {
-      title: 'Learn React',
-      category: 'Learning' as const,
+      title: 'Build Finance Plan',
+      category: 'Finance' as const,
       duration_days: 30 as const,
-      description: 'Learn React basics',
+      description: 'Create a budget and investment strategy',
       current_challenges: 'No experience',
       conversation_complete: true,
       missing_fields: [],
@@ -209,10 +209,10 @@ describe.skipIf(!shouldRunAITests)('Goal Planner Agent', () => {
 
     const goalInput = planningStateToGoalInput(state)
 
-    expect(goalInput.title).toBe('Learn React')
-    expect(goalInput.category).toBe('Learning')
+    expect(goalInput.title).toBe('Build Finance Plan')
+    expect(goalInput.category).toBe('Finance')
     expect(goalInput.duration_days).toBe(30)
-    expect(goalInput.description).toBe('Learn React basics')
+    expect(goalInput.description).toBe('Create a budget and investment strategy')
     expect(goalInput.current_challenges).toBe('No experience')
   })
 

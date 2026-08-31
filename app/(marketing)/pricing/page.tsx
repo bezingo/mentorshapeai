@@ -2,6 +2,12 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 
+/**
+ * Pricing Page - School/Enterprise Focus
+ * 
+ * M0 school-pilot: This is a B2B school-sold product, not a consumer marketplace.
+ * Individual pricing tiers are replaced with enterprise/school contact information.
+ */
 export default function PricingPage() {
   return (
     <div className="flex min-h-screen flex-col">
@@ -18,56 +24,52 @@ export default function PricingPage() {
 
       <main className="flex-1 py-24">
         <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-4xl">
+          <div className="mx-auto max-w-3xl">
             <div className="text-center mb-12">
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-                Simple, transparent pricing
+                Mentorship for Schools & Universities
               </h1>
               <p className="mt-4 text-lg text-muted-foreground">
-                Choose the plan that's right for you. All plans include core features.
+                Mentorshape partners with educational institutions to deliver outcome-focused
+                student mentorship programs.
               </p>
             </div>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <Card className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Free</h3>
-                <p className="text-3xl font-bold mb-4">$0</p>
-                <ul className="space-y-2 text-sm text-muted-foreground mb-6">
-                  <li>• Create up to 3 goals</li>
-                  <li>• Basic goal tracking</li>
-                  <li>• Public goal pages</li>
-                </ul>
-                <Button className="w-full" variant="outline">
-                  Get Started
-                </Button>
-              </Card>
-              <Card className="p-6 border-primary">
-                <h3 className="text-xl font-semibold mb-2">Pro</h3>
-                <p className="text-3xl font-bold mb-4">$29<span className="text-sm font-normal">/mo</span></p>
-                <ul className="space-y-2 text-sm text-muted-foreground mb-6">
-                  <li>• Unlimited goals</li>
-                  <li>• AI-powered goal shaping</li>
-                  <li>• Focus session planning & summaries</li>
-                  <li>• Progress tracking</li>
-                </ul>
-                <Button className="w-full">Get Started</Button>
-              </Card>
-              <Card className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Enterprise</h3>
-                <p className="text-3xl font-bold mb-4">Custom</p>
-                <ul className="space-y-2 text-sm text-muted-foreground mb-6">
-                  <li>• Everything in Pro</li>
-                  <li>• Organization features</li>
-                  <li>• AI matching</li>
-                  <li>• Custom integrations</li>
-                </ul>
-                <Button className="w-full" variant="outline">
-                  Contact Sales
-                </Button>
-              </Card>
-            </div>
-            <p className="text-center text-sm text-muted-foreground mt-8">
-              Note: Pricing is managed through Clerk Billing. Plans can be configured in the Clerk Dashboard.
-            </p>
+            <Card className="p-8 text-center">
+              <h3 className="text-2xl font-semibold mb-4">School & University Programs</h3>
+              <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
+                Our platform connects students with in-roster mentors for goal-setting,
+                career guidance, and personal development. Programs are customized
+                for each institution's needs.
+              </p>
+              <ul className="space-y-3 text-left max-w-md mx-auto mb-8">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">✓</span>
+                  <span>AI-powered goal planning & milestone tracking</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">✓</span>
+                  <span>Focus sessions with structured agendas</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">✓</span>
+                  <span>Progress tracking & outcome measurement</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">✓</span>
+                  <span>In-roster mentor matching (coming soon)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">✓</span>
+                  <span>Organization & program management</span>
+                </li>
+              </ul>
+              <Button size="lg" asChild>
+                <Link href="mailto:hello@mentorshape.ai">Contact Us for Pricing</Link>
+              </Button>
+              <p className="text-sm text-muted-foreground mt-4">
+                Programs start at the school or department level. No individual consumer pricing.
+              </p>
+            </Card>
           </div>
         </div>
       </main>

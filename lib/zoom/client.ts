@@ -300,7 +300,7 @@ export async function createZoomMeeting(
       duration: params.duration,
       timezone: params.timezone || 'UTC',
       settings: {
-        auto_recording: params.settings?.auto_recording || 'cloud',
+        auto_recording: params.settings?.auto_recording || 'none',
         join_before_host: params.settings?.join_before_host ?? true,
         waiting_room: params.settings?.waiting_room ?? false,
         mute_upon_entry: params.settings?.mute_upon_entry ?? false,

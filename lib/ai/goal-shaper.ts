@@ -103,7 +103,7 @@ Requirements:
 - Questions should be relevant to the goal and challenges (generate 5-8 questions)
 - Risks should be realistic and mitigations should be actionable
 - If EXISTING_SUCCESS_DEFINITION is provided, use it as context but generate a refined version if needed
-- Consider the CATEGORY when generating milestones (Career, Startup, Fitness, Learning, Personal Growth)`
+- Consider the CATEGORY when generating milestones (Finance, Career, Personal Growth, Entrepreneurship)`
 
 /**
  * Shape a user-written goal into structured milestones, success criteria, and mentor questions
@@ -115,10 +115,10 @@ Requirements:
  * @example
  * ```typescript
  * const shaped = await shapeGoal({
- *   title: "Learn React",
+ *   title: "Transition to Tech Career",
  *   duration_days: 30,
- *   current_challenges: "No prior JavaScript experience",
- *   category: "Learning"
+ *   current_challenges: "No prior tech experience",
+ *   category: "Career"
  * })
  * ```
  */
