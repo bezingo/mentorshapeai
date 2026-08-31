@@ -29,7 +29,9 @@ import {
   AlertTriangle,
   Calendar,
   Video,
+  Flag,
 } from 'lucide-react'
+import { ReportConcernButton } from '@/components/safeguarding/ReportConcernButton'
 import { useToast } from '@/hooks/use-toast'
 import { type CollaborationStatus } from '@/lib/validations/collaboration'
 
@@ -268,6 +270,14 @@ export function CollaborationActions({
             )}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Report Concern Button */}
+        <ReportConcernButton 
+          collaborationId={collaborationId}
+          variant="ghost"
+          size="icon"
+          className="text-muted-foreground hover:text-destructive"
+        />
       </div>
 
       {/* Accept Dialog */}

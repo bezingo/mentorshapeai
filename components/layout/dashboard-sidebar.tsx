@@ -12,7 +12,8 @@ import {
   Menu,
   X,
   Clock,
-  Package
+  Package,
+  GraduationCap,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -73,6 +74,11 @@ const navItems: NavItem[] = [
     title: 'Organizations',
     href: '/dashboard/org',
     icon: Building2,
+  },
+  {
+    title: 'Counselor',
+    href: '/dashboard/counselor',
+    icon: GraduationCap,
   },
   {
     title: 'Settings',
