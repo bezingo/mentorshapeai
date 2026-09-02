@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, getCurrentProfile } from '@/lib/clerk'
+import { requireAuth, getCurrentProfile } from '@/lib/auth-helpers'
 import { createServiceClient } from '@/lib/supabase/service'
 import { parseOAuthState, encryptOAuthTokens } from '@/lib/crypto/tokens'
 import {

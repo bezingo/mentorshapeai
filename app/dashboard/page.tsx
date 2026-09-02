@@ -1,14 +1,13 @@
 import { redirect } from 'next/navigation'
-import { getCurrentProfile } from '@/lib/clerk'
+import { getCurrentProfile, getSession } from '@/lib/auth-helpers'
 import { Card } from '@/components/ui/card'
-import { auth } from '@clerk/nextjs/server'
 import { BecomeMentorCard } from '@/components/mentor/BecomeMentorCard'
 
 export default async function DashboardPage() {
-  // Check Clerk authentication first
-  const { userId } = await auth()
+  // Check authentication first
+  const session = await getSession()
   
-  if (!userId) {
+  if (!session) {
     redirect('/sign-in')
   }
 
@@ -129,4 +128,3 @@ export default async function DashboardPage() {
     </div>
   )
 }
-

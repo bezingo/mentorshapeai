@@ -3,6 +3,9 @@ import { DashboardSidebar } from '@/components/layout/dashboard-sidebar'
 import { DashboardHeader } from '@/components/layout/dashboard-header'
 import { QueryProvider } from '@/components/providers/query-provider'
 
+// Force dynamic rendering for dashboard pages (they use cookies for auth)
+export const dynamic = 'force-dynamic'
+
 export default function DashboardLayout({
   children,
 }: {

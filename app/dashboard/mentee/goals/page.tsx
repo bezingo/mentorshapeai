@@ -1,4 +1,4 @@
-import { getCurrentProfile, requireMentee } from '@/lib/clerk'
+import { getCurrentProfile, requireMentee } from '@/lib/auth-helpers'
 import { createServiceClient } from '@/lib/supabase/service'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

@@ -1,44 +1,54 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-const isPublicRoute = createRouteMatcher([
+const publicRoutes = [
   '/',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/g/(.*)', // Public goal pages
-  '/m/(.*)', // Public mentor pages
+  '/sign-in',
+  '/sign-up',
+  '/g/', // Public goal pages (prefix match)
+  '/m/', // Public mentor pages (prefix match)
   '/pricing',
-  '/api/webhook/(.*)', // Webhook endpoints (handled separately)
-])
+  '/api/auth/', // Better Auth routes
+  '/api/webhook/', // Webhook endpoints
+]
 
-const isDashboardRoute = createRouteMatcher([
-  '/dashboard(.*)',
-])
+const isPublicRoute = (pathname: string): boolean => {
+  return publicRoutes.some((route) => {
+    if (route.endsWith('/')) {
+      return pathname === route.slice(0, -1) || pathname.startsWith(route)
+    }
+    return pathname === route || pathname.startsWith(route + '/')
+  })
+}
 
-const isMentorRoute = createRouteMatcher([
-  '/mentor(.*)',
-])
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
 
-export default clerkMiddleware(async (auth, request) => {
-  // Protect dashboard routes
-  if (isDashboardRoute(request)) {
-    await auth.protect()
+  // Allow public routes
+  if (isPublicRoute(pathname)) {
+    return NextResponse.next()
   }
-  // Protect mentor routes (onboarding, etc.)
-  else if (isMentorRoute(request)) {
-    await auth.protect()
+
+  // Check for Better Auth session cookie
+  const sessionToken = request.cookies.get('better-auth.session_token')?.value
+
+  // If no session, redirect to sign-in
+  if (!sessionToken) {
+    const signInUrl = new URL('/sign-in', request.url)
+    signInUrl.searchParams.set('redirect', pathname)
+    return NextResponse.redirect(signInUrl)
   }
-  // Protect all other routes except public ones
-  else if (!isPublicRoute(request)) {
-    await auth.protect()
-  }
-})
+
+  // Session exists, allow the request
+  // Note: Full session validation happens in server components/API routes
+  // The middleware just checks for the presence of the cookie
+  return NextResponse.next()
+}
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
+    // Skip Next.js internals and static files
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
-    '/(api|trpc)(.*)',
+    // Always run for API routes (except auth)
+    '/(api(?!/auth))(.*)',
   ],
 }
-

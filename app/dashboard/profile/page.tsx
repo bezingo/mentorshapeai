@@ -16,7 +16,7 @@ import { MentorFieldsSection } from '@/components/profile/mentor-fields-section'
 import { PublicHandleSection } from '@/components/profile/public-handle-section'
 import { Card, CardContent } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
-import { useUser } from '@clerk/nextjs'
+import { useSession } from '@/lib/auth-client'
 import type { WorkExperience } from '@/components/profile/work-history-section'
 import type { Education } from '@/components/profile/education-section'
 import type { Skill } from '@/components/profile/skills-section'
@@ -223,7 +223,7 @@ async function deleteSkill(id: string): Promise<void> {
 }
 
 export default function ProfileEditPage() {
-  const { user } = useUser()
+  const { data: session } = useSession()
   const queryClient = useQueryClient()
 
   // Fetch profile data
@@ -430,8 +430,8 @@ export default function ProfileEditPage() {
     await updateMutation.mutateAsync({ skills_public: isPublic })
   }
 
-  // Get user email from Clerk
-  const userEmail = user?.primaryEmailAddress?.emailAddress || ''
+  // Get user email from session
+  const userEmail = session?.user?.email || ''
 
   if (isLoading) {
     return (

@@ -1,4 +1,4 @@
-import { getCurrentProfile, requireMentor } from '@/lib/clerk'
+import { getCurrentProfile, requireMentor } from '@/lib/auth-helpers'
 import { createServiceClient } from '@/lib/supabase/service'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

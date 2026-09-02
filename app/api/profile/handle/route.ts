@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/clerk'
-import { getProfileId } from '@/lib/clerk'
+import { requireAuth } from '@/lib/auth-helpers'
+import { getProfileId } from '@/lib/auth-helpers'
 import { createClient } from '@/lib/supabase/server'
 import { isValidHandle } from '@/lib/utils/slug'
 

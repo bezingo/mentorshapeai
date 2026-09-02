@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server'
-import { requireMentee, ensureUserAndProfile } from '@/lib/clerk'
+import { requireMentee, ensureUserAndProfile } from '@/lib/auth-helpers'
 import { createServiceClient } from '@/lib/supabase/service'
 
 /**

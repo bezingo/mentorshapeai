@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getCurrentProfile, requireAuth } from '@/lib/clerk'
+import { getCurrentProfile, requireAuth } from '@/lib/auth-helpers'
 import { createServiceClient } from '@/lib/supabase/service'
 import { validateOnboardingComplete, OnboardingFormData } from '@/lib/validations/onboarding'
 import { isValidHandle } from '@/lib/utils/slug'

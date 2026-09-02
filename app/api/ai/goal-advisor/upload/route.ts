@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { getCurrentProfile, requireMentee } from '@/lib/clerk'
+import { getCurrentProfile, requireMentee } from '@/lib/auth-helpers'
 import { createServiceClient } from '@/lib/supabase/service'
 import { addMemoryResource } from '@/lib/ai/goal-context-builder'
 import { extractTextFromPDF } from '@/lib/pdf-parser'

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { notFound } from 'next/navigation'
-import { auth } from '@clerk/nextjs/server'
+import { getSession } from '@/lib/auth-helpers'
 import { Metadata } from 'next'
 import { PublicProfileContent } from './public-profile-content'
 
@@ -114,6 +115,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function PublicMentorPage({ params }: PageProps) {
   const { handle } = await params
   const supabase = await createClient()
+  const supabaseService = createServiceClient()
 
   // Fetch profile with all new fields
   // Allow both mentors and mentees to have public pages
@@ -132,25 +134,17 @@ export default async function PublicMentorPage({ params }: PageProps) {
   const typedProfile = profile as Profile
 
   // Check if this is the current user's own profile
-  const { userId: clerkUserId } = await auth()
+  const session = await getSession()
   let isOwnProfile = false
 
-  if (clerkUserId) {
-    const { data: currentUser } = await supabase
-      .from('users')
+  if (session) {
+    const { data: currentProfile } = await supabaseService
+      .from('profiles')
       .select('id')
-      .eq('clerk_user_id', clerkUserId)
+      .eq('auth_user_id', session.user.id)
       .single()
 
-    if (currentUser) {
-      const { data: currentProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('user_id', currentUser.id)
-        .single()
-
-      isOwnProfile = currentProfile?.id === typedProfile.id
-    }
+    isOwnProfile = currentProfile?.id === typedProfile.id
   }
 
   // Query work_experiences, educations, skills based on visibility flags

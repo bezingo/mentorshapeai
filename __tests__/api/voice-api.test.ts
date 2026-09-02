@@ -1,8 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// Mock Clerk auth
-vi.mock('@clerk/nextjs/server', () => ({
-  auth: vi.fn(() => ({ userId: 'test-user-id' })),
+// Mock Better Auth helpers
+vi.mock('@/lib/auth-helpers', () => ({
+  getSession: vi.fn(() => ({
+    user: { id: 'test-user-id', email: 'test@example.com', name: 'Test User' },
+    session: { id: 'test-session-id', expiresAt: new Date(Date.now() + 86400000) },
+  })),
 }))
 
 // Mock Supabase
@@ -107,7 +110,6 @@ describe('Voice API - No Audio Storage', () => {
       expect(response.status).toBe(200)
       expect(data.success).toBe(true)
       expect(data.data.response).toBeDefined()
-      // Response should be in Arabic when language is ar
     })
   })
 

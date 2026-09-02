@@ -1,7 +1,9 @@
 import { redirect } from 'next/navigation'
-import { auth } from '@clerk/nextjs/server'
-import { getCurrentProfile } from '@/lib/clerk'
+import { getCurrentProfile, getSession } from '@/lib/auth-helpers'
 import { OnboardingWizard } from '@/components/mentor/onboarding/OnboardingWizard'
+
+// Force dynamic rendering (uses cookies for auth)
+export const dynamic = 'force-dynamic'
 
 /**
  * Mentor Onboarding Page
@@ -13,10 +15,10 @@ import { OnboardingWizard } from '@/components/mentor/onboarding/OnboardingWizar
  */
 export default async function MentorOnboardingPage() {
   // Check authentication
-  const { userId } = await auth()
+  const session = await getSession()
   
-  if (!userId) {
-    redirect('/sign-in?redirect_url=/mentor/onboarding')
+  if (!session) {
+    redirect('/sign-in?redirect=/mentor/onboarding')
   }
 
   // Get user profile

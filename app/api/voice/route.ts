@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { getSession } from '@/lib/auth-helpers'
 import { createServiceClient } from '@/lib/supabase/service'
 import { z } from 'zod'
 
@@ -41,8 +41,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { userId } = await auth()
-    if (!userId) {
+    const session = await getSession()
+    if (!session) {
       return NextResponse.json(
         { error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
         { status: 401 }
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('id, display_name')
-      .eq('user_id', userId)
+      .eq('auth_user_id', session.user.id)
       .single()
 
     if (!profile) {
@@ -132,7 +132,7 @@ interface VoiceResponse {
 }
 
 async function processVoiceMessage(params: ProcessVoiceParams): Promise<VoiceResponse> {
-  const { text, context, language } = params
+  const { text, language } = params
 
   // Simple keyword-based routing for demo
   // In production, this would call the AI agent

@@ -1,11 +1,10 @@
 import Link from 'next/link'
-import { SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
-import { auth } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
+import { getSession } from '@/lib/auth-helpers'
 
 export default async function LandingPage() {
-  const { userId } = await auth()
+  const session = await getSession()
+  const isAuthenticated = !!session
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -19,27 +18,18 @@ export default async function LandingPage() {
             <Link href="/pricing" className="text-sm font-medium hover:underline">
               Pricing
             </Link>
-            {userId ? (
-              <>
-                <Link href="/dashboard">
-                  <Button variant="ghost">Dashboard</Button>
-                </Link>
-                <UserButton
-                  appearance={{
-                    elements: {
-                      avatarBox: 'h-8 w-8',
-                    },
-                  }}
-                />
-              </>
+            {isAuthenticated ? (
+              <Link href="/dashboard">
+                <Button variant="ghost">Dashboard</Button>
+              </Link>
             ) : (
               <>
-                <SignInButton mode="modal">
+                <Link href="/sign-in">
                   <Button variant="ghost">Sign In</Button>
-                </SignInButton>
-                <SignUpButton mode="modal">
+                </Link>
+                <Link href="/sign-up">
                   <Button>Get Started</Button>
-                </SignUpButton>
+                </Link>
               </>
             )}
           </nav>
@@ -59,14 +49,14 @@ export default async function LandingPage() {
               through structured focus sessions and AI-guided insights.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
-              {userId ? (
+              {isAuthenticated ? (
                 <Link href="/dashboard">
                   <Button size="lg">Go to Dashboard</Button>
                 </Link>
               ) : (
-                <SignUpButton mode="modal">
+                <Link href="/sign-up">
                   <Button size="lg">Get Started Free</Button>
-                </SignUpButton>
+                </Link>
               )}
               <Link href="/pricing">
                 <Button size="lg" variant="outline">
@@ -141,4 +131,3 @@ export default async function LandingPage() {
     </div>
   )
 }
-

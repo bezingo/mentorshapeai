@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server'
-import { requireMentee } from '@/lib/clerk'
-import { ensureUserAndProfile } from '@/lib/clerk'
+import { requireMentee } from '@/lib/auth-helpers'
+import { ensureUserAndProfile } from '@/lib/auth-helpers'
 import {
   initializeGoalPlanning,
   processGoalPlanningMessage,
