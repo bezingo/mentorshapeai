@@ -1,4 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getSessionCookie } from 'better-auth/cookies'
+
+/**
+ * Route protection (Next.js 16 `proxy.ts`, formerly `middleware.ts`).
+ *
+ * Next.js 16 deprecated the `middleware.ts` convention in favor of
+ * `proxy.ts` running on the Node.js runtime. The old `middleware.ts`
+ * file was silently not executed, leaving routes unprotected.
+ */
 
 const publicRoutes = [
   '/',
@@ -13,6 +22,11 @@ const publicRoutes = [
 
 const isPublicRoute = (pathname: string): boolean => {
   return publicRoutes.some((route) => {
+    // The root route only matches exactly, otherwise every path
+    // would be treated as public (everything starts with '/')
+    if (route === '/') {
+      return pathname === '/'
+    }
     if (route.endsWith('/')) {
       return pathname === route.slice(0, -1) || pathname.startsWith(route)
     }
@@ -20,7 +34,7 @@ const isPublicRoute = (pathname: string): boolean => {
   })
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Allow public routes
@@ -28,11 +42,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Check for Better Auth session cookie
-  const sessionToken = request.cookies.get('better-auth.session_token')?.value
+  // Check for Better Auth session cookie.
+  // getSessionCookie handles both `better-auth.session_token` (HTTP/localhost)
+  // and `__Secure-better-auth.session_token` (HTTPS deployments like Vercel).
+  const sessionCookie = getSessionCookie(request)
 
   // If no session, redirect to sign-in
-  if (!sessionToken) {
+  if (!sessionCookie) {
     const signInUrl = new URL('/sign-in', request.url)
     signInUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(signInUrl)
@@ -40,7 +56,7 @@ export async function middleware(request: NextRequest) {
 
   // Session exists, allow the request
   // Note: Full session validation happens in server components/API routes
-  // The middleware just checks for the presence of the cookie
+  // The proxy just checks for the presence of the cookie
   return NextResponse.next()
 }
 

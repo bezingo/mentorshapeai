@@ -1,10 +1,14 @@
-import { cookies } from 'next/headers'
+import { headers } from 'next/headers'
+import { auth } from '@/lib/auth'
 import { createServiceClient } from '@/lib/supabase/service'
 
 /**
  * Auth helpers for server-side authentication
  * 
  * These functions replace the Clerk-based auth helpers.
+ * Session resolution is delegated to Better Auth (auth.api.getSession),
+ * which correctly handles signed cookies and the `__Secure-` cookie
+ * prefix used on HTTPS deployments.
  * All database operations use the service role client.
  */
 
@@ -24,56 +28,28 @@ interface Session {
 }
 
 /**
- * Get the current session from Better Auth cookies
+ * Get the current session via Better Auth
  */
 export async function getSession(): Promise<Session | null> {
   try {
-    const cookieStore = await cookies()
-    const sessionToken = cookieStore.get('better-auth.session_token')?.value
+    const result = await auth.api.getSession({
+      headers: await headers(),
+    })
 
-    if (!sessionToken) {
-      return null
-    }
-
-    const supabase = createServiceClient()
-    
-    // Look up session in database
-    const { data: session, error: sessionError } = await supabase
-      .from('session')
-      .select('id, userId:userId, expiresAt:expiresAt')
-      .eq('token', sessionToken)
-      .single()
-
-    if (sessionError || !session) {
-      return null
-    }
-
-    // Check if session is expired
-    if (new Date(session.expiresAt) < new Date()) {
-      return null
-    }
-
-    // Get user data
-    const { data: user, error: userError } = await supabase
-      .from('user')
-      .select('id, email, name, image')
-      .eq('id', session.userId)
-      .single()
-
-    if (userError || !user) {
+    if (!result?.session || !result?.user) {
       return null
     }
 
     return {
       user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        image: user.image,
+        id: result.user.id,
+        email: result.user.email,
+        name: result.user.name ?? null,
+        image: result.user.image ?? null,
       },
       session: {
-        id: session.id,
-        expiresAt: new Date(session.expiresAt),
+        id: result.session.id,
+        expiresAt: new Date(result.session.expiresAt),
       },
     }
   } catch (error) {
@@ -103,7 +79,7 @@ export async function getCurrentProfile() {
   const supabase = createServiceClient()
 
   // First, try to find profile by auth_user_id
-  let { data: profile, error } = await supabase
+  const { data: profile, error } = await supabase
     .from('profiles')
     .select('*')
     .eq('auth_user_id', session.user.id)
