@@ -1,4 +1,5 @@
 import { betterAuth } from 'better-auth'
+import { Pool } from 'pg'
 
 /**
  * Better Auth configuration
@@ -7,19 +8,30 @@ import { betterAuth } from 'better-auth'
  * - Email/password (always available)
  * - Google OAuth (optional, requires GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET)
  * 
- * Database: Postgres via Supabase (using SUPABASE_DB_URL)
+ * Database: Postgres via Supabase (using SUPABASE_DB_URL with pg Pool)
  */
 
-// Get connection string for Better Auth
-const getConnectionString = (): string => {
-  // Direct database connection is required for Better Auth
-  if (process.env.SUPABASE_DB_URL) {
-    return process.env.SUPABASE_DB_URL
+// Determine if we're in a local development environment
+const isLocalhost = process.env.SUPABASE_DB_URL?.includes('localhost') ||
+                    process.env.SUPABASE_DB_URL?.includes('127.0.0.1')
+
+// Create pg Pool for Better Auth database adapter
+// Better Auth 1.7+ requires a native pg Pool instance, not a URL string
+const createDatabasePool = (): Pool | undefined => {
+  const connectionString = process.env.SUPABASE_DB_URL
+  if (!connectionString) {
+    return undefined
   }
   
-  // During build or when env vars are missing, use a placeholder
-  // The actual auth will use the service client pattern in auth-helpers.ts
-  return 'placeholder://build-time'
+  return new Pool({
+    connectionString,
+    // SSL configuration for Supabase from Vercel serverless
+    ssl: isLocalhost ? false : { rejectUnauthorized: false },
+    // Conservative pool settings for serverless (Vercel functions)
+    max: 3,
+    idleTimeoutMillis: 20000,
+    connectionTimeoutMillis: 10000,
+  })
 }
 
 // Build social providers configuration
@@ -36,11 +48,9 @@ const getSocialProviders = () => {
 }
 
 // Better Auth instance
+const pool = createDatabasePool()
 export const auth = betterAuth({
-  database: {
-    type: 'postgres',
-    url: getConnectionString(),
-  },
+  database: pool,
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
