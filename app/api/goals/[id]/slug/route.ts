@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { requireMentee } from '@/lib/clerk'
-import { getProfileId } from '@/lib/clerk'
+import { requireMentee } from '@/lib/auth-helpers'
+import { getProfileId } from '@/lib/auth-helpers'
 import { createClient } from '@/lib/supabase/server'
 import { generateUniqueSlug, isValidSlug } from '@/lib/utils/slug'
 

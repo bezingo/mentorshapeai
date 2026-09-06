@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { requireAuth, getCurrentProfile } from '@/lib/clerk'
+import { requireAuth, getCurrentProfile } from '@/lib/auth-helpers'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getCalendarClient, fetchBusyBlocks } from '@/lib/google/calendar-client'
 import { renewWebhookChannelIfNeeded } from '@/lib/google/calendar-webhooks'

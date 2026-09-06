@@ -1,8 +1,8 @@
 'use client'
 
-import { Check, X } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
+import { motion, useReducedMotion } from 'motion/react'
+import { RiCheckLine, RiCloseLine } from '@remixicon/react'
+import { cx } from '@/utils/cx'
 
 interface CompletionItem {
   name: string
@@ -34,6 +34,8 @@ interface ProfileCompletionWidgetProps {
   className?: string
 }
 
+const RING_TRANSITION = { duration: 0.5, ease: [0.22, 1, 0.36, 1] } as const
+
 export function ProfileCompletionWidget({
   completionPercentage,
   profile,
@@ -42,6 +44,8 @@ export function ProfileCompletionWidget({
   skillsCount,
   className,
 }: ProfileCompletionWidgetProps) {
+  const reduceMotion = useReducedMotion()
+
   // Calculate completion items
   const completionItems: CompletionItem[] = [
     { name: 'Setup account', points: 10, completed: true }, // Always completed
@@ -77,11 +81,15 @@ export function ProfileCompletionWidget({
   const strokeDashoffset = circumference - (completionPercentage / 100) * circumference
 
   return (
-    <Card className={cn('sticky top-6', className)}>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base font-semibold">Complete your profile</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div
+      className={cx(
+        'sticky top-20 rounded-3xl border border-border-button-default bg-background-primary-default p-5 shadow-xs',
+        className
+      )}
+    >
+      <h2 className="text-headline-semibold text-text-primary">Complete your profile</h2>
+
+      <div className="mt-4 space-y-4">
         {/* Circular progress indicator */}
         <div className="flex justify-center">
           <div className="relative h-28 w-28">
@@ -92,27 +100,27 @@ export function ProfileCompletionWidget({
                 cy="50"
                 r={radius}
                 fill="none"
-                stroke="currentColor"
+                stroke="var(--color-background-tertiary-default)"
                 strokeWidth="8"
-                className="text-muted/20"
               />
-              {/* Progress circle */}
-              <circle
+              {/* Progress circle draws itself in on mount */}
+              <motion.circle
                 cx="50"
                 cy="50"
                 r={radius}
                 fill="none"
-                stroke="currentColor"
+                stroke="var(--color-accent-500)"
                 strokeWidth="8"
                 strokeLinecap="round"
                 strokeDasharray={circumference}
-                strokeDashoffset={strokeDashoffset}
-                className="text-primary transition-all duration-500 ease-out"
+                initial={reduceMotion ? false : { strokeDashoffset: circumference }}
+                animate={{ strokeDashoffset }}
+                transition={RING_TRANSITION}
               />
             </svg>
             {/* Percentage text */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-2xl font-bold">{completionPercentage}%</span>
+              <span className="text-title-2-semibold text-text-primary">{completionPercentage}%</span>
             </div>
           </div>
         </div>
@@ -120,37 +128,35 @@ export function ProfileCompletionWidget({
         {/* Checklist */}
         <div className="space-y-2">
           {completionItems.map((item) => (
-            <div
-              key={item.name}
-              className="flex items-center justify-between text-sm"
-            >
+            <div key={item.name} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div
-                  className={cn(
-                    'flex h-5 w-5 items-center justify-center rounded-full',
+                <span
+                  className={cx(
+                    'flex size-5 items-center justify-center rounded-full transition-colors duration-150',
                     item.completed
-                      ? 'bg-primary text-primary-foreground'
-                      : 'border border-muted-foreground/30'
+                      ? 'bg-accent-500 text-white'
+                      : 'border border-border-button-default text-foreground-icon-tertiary'
                   )}
                 >
                   {item.completed ? (
-                    <Check className="h-3 w-3" />
+                    <RiCheckLine className="size-3" aria-hidden />
                   ) : (
-                    <X className="h-3 w-3 text-muted-foreground/50" />
+                    <RiCloseLine className="size-3" aria-hidden />
                   )}
-                </div>
+                </span>
                 <span
-                  className={cn(
-                    item.completed ? 'text-foreground' : 'text-muted-foreground'
+                  className={cx(
+                    'text-body-regular',
+                    item.completed ? 'text-text-primary' : 'text-text-tertiary'
                   )}
                 >
                   {item.name}
                 </span>
               </div>
               <span
-                className={cn(
-                  'text-xs font-medium',
-                  item.completed ? 'text-primary' : 'text-muted-foreground'
+                className={cx(
+                  'text-caption-1-medium',
+                  item.completed ? 'text-button-ghost-foreground' : 'text-text-tertiary'
                 )}
               >
                 {item.completed ? `${item.points}%` : `+${item.points}%`}
@@ -158,7 +164,7 @@ export function ProfileCompletionWidget({
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

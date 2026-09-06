@@ -16,9 +16,9 @@ export default function MentorOffersPage() {
             Back to Dashboard
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold">Consultation Offers</h1>
+        <h1 className="text-3xl font-bold">Mentorship Offerings</h1>
         <p className="text-muted-foreground">
-          Define what you offer to mentees - free collaborations or paid consultations.
+          Define collaboration offerings for mentees. Describe what you can help with and how you like to work together.
         </p>
       </div>
 
@@ -26,8 +26,8 @@ export default function MentorOffersPage() {
       <OffersList
         fetchOnMount={true}
         onSetupPayments={() => {
-          // TODO: Navigate to payment setup when implemented
-          alert('Payment setup will be available in a future update.')
+          // School-pilot mode: payments are disabled
+          // This callback is kept for interface compatibility but should not be triggered
         }}
       />
     </div>

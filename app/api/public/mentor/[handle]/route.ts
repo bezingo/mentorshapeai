@@ -66,6 +66,7 @@ export async function GET(
     }
 
     // Fetch active mentor offers (is_active=true only)
+    // M0 school-pilot: Only fetch free_collab offers, filter out paid_consult and digital_product
     const { data: offers, error: offersError } = await serviceSupabase
       .from('mentor_offers')
       .select(`
@@ -80,6 +81,7 @@ export async function GET(
       `)
       .eq('mentor_profile_id', profile.id)
       .eq('is_active', true)
+      .eq('type', 'free_collab')
       .order('sort_order', { ascending: true })
 
     if (offersError) {

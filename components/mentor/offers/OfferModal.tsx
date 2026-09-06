@@ -27,11 +27,15 @@ import {
 import { cn } from '@/lib/utils'
 import type { MentorOffer } from './OfferCard'
 
-/** Offer types for the select dropdown */
+/** Offer types for the select dropdown
+ * M0 school-pilot: Only free collaborations are enabled.
+ * Paid consults and digital products are disabled for school deployments.
+ */
 const OFFER_TYPES = [
-  { value: 'free_collab', label: 'Free Collaboration', description: 'Mentorship without payment' },
-  { value: 'paid_consult', label: 'Paid Consultation', description: 'Paid one-on-one sessions' },
-  { value: 'digital_product', label: 'Digital Product', description: 'Courses, guides, templates' },
+  { value: 'free_collab', label: 'Free Collaboration', description: 'Mentorship collaboration' },
+  // Disabled for M0 school-pilot - no paid consults or digital products
+  // { value: 'paid_consult', label: 'Paid Consultation', description: 'Paid one-on-one sessions' },
+  // { value: 'digital_product', label: 'Digital Product', description: 'Courses, guides, templates' },
 ] as const
 
 /** Duration presets in minutes */
@@ -51,7 +55,10 @@ const CURRENCIES = [
   { value: 'gbp', label: 'GBP (£)' },
 ] as const
 
-/** Form validation schema */
+/** Form validation schema
+ * M0 school-pilot: Only free_collab is allowed.
+ * We keep the other types in the enum for backward compatibility with existing data.
+ */
 const offerFormSchema = z.object({
   type: z.enum(['free_collab', 'paid_consult', 'digital_product'], {
     required_error: 'Please select an offer type',
@@ -368,14 +375,12 @@ export function OfferModal({
             </div>
           )}
 
-          {/* Note for paid consultations */}
-          {isPaidType && (
-            <div className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
-              <p>
-                Note: Paid consultations require payment setup. You can configure payments after creating this offer.
-              </p>
-            </div>
-          )}
+          {/* Note for free collaborations - school-pilot mode */}
+          <div className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
+            <p>
+              Collaborations are free mentorship sessions. Mentees can request to work with you through this offering.
+            </p>
+          </div>
 
           <DialogFooter className="gap-2 pt-2">
             <Button

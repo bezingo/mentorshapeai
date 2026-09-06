@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { requireAuth, getCurrentProfile } from '@/lib/clerk'
+import { requireAuth, getCurrentProfile } from '@/lib/auth-helpers'
 import { createServiceClient } from '@/lib/supabase/service'
 import { createOAuthState } from '@/lib/crypto/tokens'
 import { getZoomAuthorizationUrl } from '@/lib/zoom/client'

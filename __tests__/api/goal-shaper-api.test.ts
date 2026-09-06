@@ -16,8 +16,8 @@ import { NextRequest } from 'next/server'
 
 // Mock Clerk authentication
 vi.mock('@clerk/nextjs/server', () => ({
-  auth: vi.fn(),
-  currentUser: vi.fn(),
+  getSession: vi.fn(),
+  getAuthUserId: vi.fn(),
 }))
 
 vi.mock('@/lib/clerk', async () => {
@@ -83,12 +83,12 @@ describe.skipIf(!shouldRunIntegrationTests)('Goal Shaper API', () => {
       .from('goals')
       .insert({
         profile_id: testProfileId,
-        title: 'Learn React Basics',
-        description: 'Want to build a portfolio project',
-        category: 'Learning',
+        title: 'Build Personal Finance Plan',
+        description: 'Want to create a budget and investment strategy',
+        category: 'Finance',
         duration_days: 30,
         status: 'draft',
-        current_challenges: 'No prior JavaScript experience',
+        current_challenges: 'No prior finance experience',
       })
       .select()
       .single()
@@ -198,7 +198,7 @@ describe.skipIf(!shouldRunIntegrationTests)('Goal Shaper API', () => {
               title: 'Launch a SaaS Product',
               duration_days: 60,
               current_challenges: 'Limited marketing budget',
-              category: 'Startup',
+              category: 'Entrepreneurship',
               description: 'Build and launch a SaaS product',
             },
           }),

@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { requireAuth, getCurrentProfile } from '@/lib/clerk'
+import { requireAuth, getCurrentProfile } from '@/lib/auth-helpers'
 import { createServiceClient } from '@/lib/supabase/service'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'

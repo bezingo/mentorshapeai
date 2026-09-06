@@ -1,6 +1,6 @@
 'use client'
 
-import { useUser } from '@clerk/nextjs'
+import { useSession } from '@/lib/auth-client'
 import { Award, Calendar, DollarSign, Sparkles } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
@@ -9,10 +9,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
  * Shows user's avatar/name, mentor benefits, and prepares them for the onboarding process
  */
 export function WelcomeStep() {
-  const { user } = useUser()
+  const { data: session } = useSession()
 
-  const avatarUrl = user?.imageUrl
-  const displayName = user?.fullName || user?.firstName || 'there'
+  const avatarUrl = session?.user?.image || undefined
+  const displayName = session?.user?.name || 'there'
   const initials = displayName
     .split(' ')
     .map((n) => n[0])

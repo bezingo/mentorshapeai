@@ -1,18 +1,18 @@
 import { redirect } from 'next/navigation'
-import { getCurrentProfile } from '@/lib/clerk'
-import { Card } from '@/components/ui/card'
-import { auth } from '@clerk/nextjs/server'
+import { getCurrentProfile, getSession } from '@/lib/auth-helpers'
+import { getOrgMembership } from '@/lib/auth/org-access'
+import { FeatureHub, type FeatureCardData } from '@/components/dashboard/feature-hub'
 import { BecomeMentorCard } from '@/components/mentor/BecomeMentorCard'
 
 export default async function DashboardPage() {
-  // Check Clerk authentication first
-  const { userId } = await auth()
-  
-  if (!userId) {
+  // Check authentication first
+  const session = await getSession()
+
+  if (!session) {
     redirect('/sign-in')
   }
 
-  // Get profile (will create if missing)
+  // Get profile (auto-creates users + profiles rows with mentee defaults on first login)
   const profile = await getCurrentProfile()
 
   // If profile still doesn't exist after ensuring, show error
@@ -20,113 +20,102 @@ export default async function DashboardPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Error setting up profile</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-title-1-medium text-text-primary">Error setting up profile</h1>
+          <p className="mt-1 text-body-regular text-text-secondary">
             We couldn&apos;t create your profile. Please try refreshing the page.
           </p>
         </div>
-        <Card className="p-6">
-          <p className="text-sm text-muted-foreground">
+        <div className="rounded-3xl border border-border-button-default bg-background-primary-default p-6 shadow-xs">
+          <p className="text-body-regular text-text-secondary">
             If this issue persists, please contact support.
           </p>
-        </Card>
-      </div>
-    )
-  }
-
-  // Determine default view based on roles
-  // If user is only a mentee (not a mentor), show goals with "Become a Mentor" CTA
-  if (profile.is_mentee && !profile.is_mentor) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Welcome back!</h1>
-          <p className="text-muted-foreground">
-            Manage your goals, track progress, and collaborate with mentors.
-          </p>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Main content - Goals card */}
-          <div className="lg:col-span-2 space-y-4">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-2">My Goals</h2>
-              <p className="text-sm text-muted-foreground mb-4">
-                View and manage your personal and professional goals.
-              </p>
-              <a
-                href="/dashboard/mentee/goals"
-                className="text-sm font-medium text-primary hover:underline"
-              >
-                Go to Goals →
-              </a>
-            </Card>
-
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-2">Collaborations</h2>
-              <p className="text-sm text-muted-foreground mb-4">
-                View your mentoring relationships and focus sessions.
-              </p>
-              <a
-                href="/dashboard/collaborations"
-                className="text-sm font-medium text-primary hover:underline"
-              >
-                View Collaborations →
-              </a>
-            </Card>
-          </div>
-
-          {/* Sidebar - Become a Mentor CTA */}
-          <div>
-            <BecomeMentorCard />
-          </div>
         </div>
       </div>
     )
   }
 
-  if (profile.is_mentor && !profile.is_mentee) {
-    redirect('/dashboard/mentor')
+  // Counselor/admin access is determined by org membership role
+  const orgMembership = await getOrgMembership(profile.id)
+  const isCounselor = orgMembership?.role === 'admin'
+
+  const features: FeatureCardData[] = []
+
+  if (profile.is_mentee) {
+    features.push({
+      title: 'My Goals',
+      description: 'Set, track, and achieve your personal and professional goals.',
+      icon: 'target',
+      links: [
+        { label: 'View Goals', href: '/dashboard/mentee/goals', icon: 'target' },
+        { label: 'Create New Goal', href: '/dashboard/mentee/goals/new', icon: 'plus' },
+      ],
+    })
   }
 
-  // User is both mentor and mentee - show overview
+  features.push({
+    title: 'Collaborations',
+    description: 'Your mentoring relationships and shared progress.',
+    icon: 'users',
+    links: [{ label: 'View Collaborations', href: '/dashboard/collaborations', icon: 'users' }],
+  })
+
+  features.push({
+    title: 'Focuses',
+    description: 'Focus sessions and areas you are working on with mentors.',
+    icon: 'calendar',
+    links: [{ label: 'View Focuses', href: '/dashboard/focuses', icon: 'calendar' }],
+  })
+
+  if (profile.is_mentor) {
+    features.push({
+      title: 'Mentor Area',
+      description: 'Manage your mentees, availability, and mentoring offers.',
+      icon: 'users',
+      links: [
+        { label: 'Mentor Dashboard', href: '/dashboard/mentor', icon: 'users' },
+        { label: 'Availability', href: '/dashboard/mentor/availability', icon: 'clock' },
+        { label: 'Offers', href: '/dashboard/mentor/offers', icon: 'package' },
+      ],
+    })
+  }
+
+  if (isCounselor) {
+    features.push({
+      title: 'Counselor Area',
+      description: `School tools for ${orgMembership?.org.name ?? 'your organization'}: rosters, pairs, and reports.`,
+      icon: 'graduation',
+      links: [
+        { label: 'Counselor Dashboard', href: '/dashboard/counselor', icon: 'graduation' },
+        { label: 'Mentor–Mentee Pairs', href: '/dashboard/counselor/pairs', icon: 'users' },
+        { label: 'Import Roster (CSV)', href: '/dashboard/counselor/import', icon: 'plus' },
+      ],
+    })
+  }
+
+  features.push({
+    title: 'Profile & Settings',
+    description: 'Update your public profile and account preferences.',
+    icon: 'user',
+    links: [
+      { label: 'My Profile', href: '/dashboard/profile', icon: 'user' },
+      { label: 'Settings', href: '/dashboard/settings', icon: 'settings' },
+    ],
+  })
+
+  const displayName = profile.display_name || session.user.name || session.user.email
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Welcome back!</h1>
-        <p className="text-muted-foreground">
-          Choose a mode to get started or view your overview below.
+        <h1 className="text-title-1-medium text-text-primary">Welcome back, {displayName}!</h1>
+        <p className="mt-1 text-body-regular text-text-secondary">
+          Everything Mentorshape offers, in one place. Pick up where you left off.
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-2">Mentee Mode</h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            Manage your goals, track progress, and collaborate with mentors.
-          </p>
-          <a
-            href="/dashboard/mentee/goals"
-            className="text-sm font-medium text-primary hover:underline"
-          >
-            Go to Goals →
-          </a>
-        </Card>
+      <FeatureHub features={features} />
 
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-2">Mentor Mode</h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            Manage collaborations, availability, and help mentees achieve their goals.
-          </p>
-          <a
-            href="/dashboard/mentor"
-            className="text-sm font-medium text-primary hover:underline"
-          >
-            Go to Mentor Dashboard →
-          </a>
-        </Card>
-      </div>
+      {profile.is_mentee && !profile.is_mentor && <BecomeMentorCard compact />}
     </div>
   )
 }
-

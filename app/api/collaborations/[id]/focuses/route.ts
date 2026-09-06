@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server'
-import { requireAuth, ensureUserAndProfile } from '@/lib/clerk'
+import { requireAuth, ensureUserAndProfile } from '@/lib/auth-helpers'
 import { createServiceClient } from '@/lib/supabase/service'
 import {
   BookFocusSchema,
@@ -438,7 +438,7 @@ export async function POST(
           duration: duration_minutes,
           timezone: (collaboration.mentor_profile as { timezone?: string } | null)?.timezone || 'UTC',
           settings: {
-            auto_recording: 'cloud',
+            auto_recording: 'none',
             join_before_host: true,
             waiting_room: false,
           },

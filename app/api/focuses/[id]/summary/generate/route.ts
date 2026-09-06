@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server'
-import { requireAuth, ensureUserAndProfile } from '@/lib/clerk'
+import { requireAuth, ensureUserAndProfile } from '@/lib/auth-helpers'
 import { createServiceClient } from '@/lib/supabase/service'
 import { generateAndSaveFocusSummary } from '@/lib/ai/transcript-summarizer'
 

@@ -22,11 +22,15 @@ vi.mock('next/navigation', () => ({
   usePathname: () => '/dashboard/profile',
 }))
 
-// Mock Clerk
-vi.mock('@clerk/nextjs', () => ({
-  useUser: () => ({
-    user: {
-      primaryEmailAddress: { emailAddress: 'test@example.com' },
+// Mock Better Auth client
+vi.mock('@/lib/auth-client', () => ({
+  useSession: () => ({
+    data: {
+      user: {
+        id: 'test-user-id',
+        email: 'test@example.com',
+        name: 'Test User',
+      },
     },
   }),
 }))

@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server'
-import { requireAuth, ensureUserAndProfile } from '@/lib/clerk'
+import { requireAuth, ensureUserAndProfile } from '@/lib/auth-helpers'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getZoomClient, createZoomMeeting } from '@/lib/zoom/client'
 import { z } from 'zod'
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
       duration,
       timezone,
       settings: {
-        auto_recording: 'cloud',
+        auto_recording: 'none',
         join_before_host: true,
         waiting_room: false,
       },

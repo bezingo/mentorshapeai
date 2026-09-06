@@ -43,10 +43,9 @@ export function OffersList({
   const [modalOpen, setModalOpen] = useState(false)
   const [editingOffer, setEditingOffer] = useState<MentorOffer | null>(null)
 
-  // Check if any offer requires payment setup
-  const hasPaymentRequiredOffers = offers.some(
-    (offer) => offer.payment_required && offer.type === 'paid_consult' && offer.is_active
-  )
+  // M0 school-pilot: Payment setup is disabled. No paid consults.
+  // This flag is kept for backward compatibility but should always be false.
+  const hasPaymentRequiredOffers = false
 
   // Fetch offers on mount
   useEffect(() => {
@@ -299,9 +298,9 @@ export function OffersList({
       {/* Header with Add Button */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Consultation Offerings</h2>
+          <h2 className="text-lg font-semibold">Mentorship Offerings</h2>
           <p className="text-sm text-muted-foreground">
-            Define what you offer to mentees
+            Define collaboration offerings for mentees
           </p>
         </div>
         <Button type="button" onClick={handleAddNew}>

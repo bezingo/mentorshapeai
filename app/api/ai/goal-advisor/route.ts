@@ -1,7 +1,7 @@
 import { streamText, tool } from 'ai'
 import { openai } from '@ai-sdk/openai'
 import { z } from 'zod'
-import { getCurrentProfile, requireMentee } from '@/lib/clerk'
+import { getCurrentProfile, requireMentee } from '@/lib/auth-helpers'
 import { 
   buildGoalContext, 
   getOrCreateConversation,

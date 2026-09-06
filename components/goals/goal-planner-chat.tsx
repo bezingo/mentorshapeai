@@ -3,13 +3,16 @@
 import { useState, useEffect, useRef } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Separator } from '@/components/ui/separator'
-import { Loader2, Send, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react'
-import { GoalShapingModal } from './goal-shaping-modal'
+import { motion, useReducedMotion } from 'motion/react'
+import { RiCheckboxCircleFill, RiSparklingLine } from '@remixicon/react'
+import { AgentMessage } from '@/components/application/agent-chat/agent-chat-message'
+import { AgentComposer } from '@/components/application/agent-chat/agent-composer'
+import { AgentThinking } from '@/components/application/agent-thinking/agent-thinking'
+import { Button } from '@/components/base/buttons/button'
+import { Chip } from '@/components/base/badges/chip'
+import { Divider } from '@/components/base/divider/divider'
+import { cx } from '@/utils/cx'
+import { GoalShapingModal, type GoalShapedData } from './goal-shaping-modal'
 
 interface Message {
   id: string
@@ -47,6 +50,25 @@ interface ChatResponse {
   is_complete: boolean
 }
 
+// BoardUI condense-in for panel fields as they get extracted.
+const FIELD_HIDDEN = { opacity: 0, y: 4, filter: 'blur(2px)' }
+const FIELD_SHOWN = { opacity: 1, y: 0, filter: 'blur(0px)' }
+const FIELD_TRANSITION = { duration: 0.22, ease: 'easeOut' } as const
+
+function PanelField({ label, children }: { label: string; children: React.ReactNode }) {
+  const reduceMotion = useReducedMotion()
+  return (
+    <motion.div
+      initial={reduceMotion ? false : FIELD_HIDDEN}
+      animate={FIELD_SHOWN}
+      transition={FIELD_TRANSITION}
+    >
+      <h3 className="mb-1 text-caption-1-medium tracking-wide text-text-tertiary uppercase">{label}</h3>
+      <div className="text-body-regular text-text-secondary">{children}</div>
+    </motion.div>
+  )
+}
+
 export function GoalPlannerChat() {
   const router = useRouter()
   const [sessionId, setSessionId] = useState<string | null>(null)
@@ -59,7 +81,7 @@ export function GoalPlannerChat() {
   const [isComplete, setIsComplete] = useState(false)
   const [showShapingModal, setShowShapingModal] = useState(false)
   const [createdGoalId, setCreatedGoalId] = useState<string | null>(null)
-  const [shapedGoalData, setShapedGoalData] = useState<any>(null)
+  const [shapedGoalData, setShapedGoalData] = useState<GoalShapedData | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll to bottom when new messages arrive
@@ -124,19 +146,8 @@ export function GoalPlannerChat() {
     },
     onSuccess: (data: { data: ChatResponse }) => {
       const response = data.data
-      
-      // Add user message
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `user-${Date.now()}`,
-          role: 'user',
-          content: input,
-          timestamp: new Date(),
-        },
-      ])
 
-      // Add assistant response
+      // Add assistant response (the user message was added optimistically)
       setMessages((prev) => [
         ...prev,
         {
@@ -150,7 +161,6 @@ export function GoalPlannerChat() {
       // Update state
       setState(response.state)
       setIsComplete(response.is_complete)
-      setInput('')
     },
     onError: (error: Error) => {
       alert(`Error: ${error.message}`)
@@ -213,15 +223,21 @@ export function GoalPlannerChat() {
   })
 
   const handleSend = () => {
-    if (!input.trim() || sendMessageMutation.isPending) return
-    sendMessageMutation.mutate(input)
-  }
+    const message = input.trim()
+    if (!message || sendMessageMutation.isPending || !sessionId) return
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
-    }
+    // Optimistic user message; the API call is unchanged.
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: message,
+        timestamp: new Date(),
+      },
+    ])
+    setInput('')
+    sendMessageMutation.mutate(message)
   }
 
   const handleCreateGoal = (status: 'draft' | 'active') => {
@@ -230,181 +246,123 @@ export function GoalPlannerChat() {
 
   if (startSessionMutation.isPending) {
     return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center rounded-3xl border border-border-button-default bg-background-primary-default py-16 shadow-xs">
+        <AgentThinking variant="wave" label="Starting your planning session" />
+      </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
+    <div className="grid h-[calc(100vh-200px)] grid-cols-1 gap-6 lg:grid-cols-3">
       {/* Chat Area */}
-      <div className="lg:col-span-2 flex flex-col">
-        <Card className="flex-1 flex flex-col">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5" />
+      <div className="flex flex-col lg:col-span-2">
+        <div className="flex flex-1 flex-col overflow-hidden rounded-3xl border border-border-button-default bg-background-primary-default shadow-xs">
+          <div className="border-b border-separator-border px-5 py-4">
+            <h2 className="flex items-center gap-2 text-headline-semibold text-text-primary">
+              <RiSparklingLine className="size-5 text-button-ghost-foreground" aria-hidden />
               Goal Planner
-            </CardTitle>
-            <CardDescription>
-              Tell me about your goal and I'll help you plan it step by step
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex-1 flex flex-col overflow-hidden">
+            </h2>
+            <p className="mt-0.5 text-body-regular text-text-secondary">
+              Tell me about your goal and I&apos;ll help you plan it step by step
+            </p>
+          </div>
+
+          <div className="flex flex-1 flex-col overflow-hidden bg-background-secondary-default/40 p-4">
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto space-y-4 mb-4 pr-2">
+            <div className="flex-1 space-y-4 overflow-y-auto pr-1 pb-4">
               {messages.map((message) => (
-                <div
+                <AgentMessage
                   key={message.id}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                      message.role === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted'
-                    }`}
-                  >
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                  </div>
-                </div>
+                  role={message.role}
+                  text={message.content}
+                  at={message.timestamp.getTime()}
+                />
               ))}
               {sendMessageMutation.isPending && (
-                <div className="flex justify-start">
-                  <div className="bg-muted rounded-lg px-4 py-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  </div>
+                <div className="px-1 py-2">
+                  <AgentThinking variant="wave" label="Thinking" showTimer />
                 </div>
               )}
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
-            <div className="flex gap-2">
-              <Textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your message..."
-                rows={2}
-                disabled={sendMessageMutation.isPending || !sessionId}
-                className="resize-none"
-              />
-              <Button
-                onClick={handleSend}
-                disabled={!input.trim() || sendMessageMutation.isPending || !sessionId}
-                size="icon"
-                className="shrink-0"
-              >
-                {sendMessageMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            {/* Composer */}
+            <AgentComposer
+              value={input}
+              onValueChange={setInput}
+              onSubmit={handleSend}
+              onStop={() => {}}
+              busy={sendMessageMutation.isPending}
+              provider="Goal Planner"
+              messageCount={messages.length}
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Sidebar */}
+      {/* Extracted information panel */}
       <div className="lg:col-span-1">
-        <Card className="h-full overflow-y-auto">
-          <CardHeader>
-            <CardTitle className="text-lg">Extracted Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Goal Title */}
+        <div className="h-full overflow-y-auto rounded-3xl border border-border-button-default bg-background-primary-default p-5 shadow-xs">
+          <h2 className="text-headline-semibold text-text-primary">Extracted information</h2>
+
+          <div className="mt-4 space-y-4">
             {state.title && (
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">Goal</h3>
-                <p className="text-sm font-medium">{state.title}</p>
-              </div>
+              <PanelField label="Goal">
+                <p className="text-body-medium text-text-primary">{state.title}</p>
+              </PanelField>
             )}
 
-            {/* Category */}
-            {state.category && (
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">Category</h3>
-                <p className="text-sm">{state.category}</p>
-              </div>
+            {(state.category || state.duration_days) && (
+              <motion.div
+                initial={FIELD_HIDDEN}
+                animate={FIELD_SHOWN}
+                transition={FIELD_TRANSITION}
+                className="flex flex-wrap gap-1.5"
+              >
+                {state.category && <Chip color="purple">{state.category}</Chip>}
+                {state.duration_days && <Chip color="soft">{state.duration_days} days</Chip>}
+              </motion.div>
             )}
 
-            {/* Duration */}
-            {state.duration_days && (
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">Duration</h3>
-                <p className="text-sm">{state.duration_days} days</p>
-              </div>
-            )}
-
-            {/* Description */}
-            {state.description && (
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">Description</h3>
-                <p className="text-sm text-muted-foreground">{state.description}</p>
-              </div>
-            )}
-
-            {/* Challenges */}
+            {state.description && <PanelField label="Description">{state.description}</PanelField>}
             {state.current_challenges && (
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">Challenges</h3>
-                <p className="text-sm text-muted-foreground">{state.current_challenges}</p>
-              </div>
+              <PanelField label="Challenges">{state.current_challenges}</PanelField>
             )}
-
-            {/* Motivation */}
-            {state.motivation && (
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">Why</h3>
-                <p className="text-sm text-muted-foreground">{state.motivation}</p>
-              </div>
-            )}
-
-            {/* Success Definition */}
+            {state.motivation && <PanelField label="Why">{state.motivation}</PanelField>}
             {state.success_definition && (
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                  Success Looks Like
-                </h3>
-                <p className="text-sm text-muted-foreground">{state.success_definition}</p>
-              </div>
+              <PanelField label="Success looks like">{state.success_definition}</PanelField>
             )}
-
-            {/* Suggested Approach */}
             {state.suggested_approach && (
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                  Suggested Approach
-                </h3>
-                <p className="text-sm text-muted-foreground">{state.suggested_approach}</p>
-              </div>
+              <PanelField label="Suggested approach">{state.suggested_approach}</PanelField>
             )}
 
-            <Separator />
+            <Divider />
 
             {/* Milestones Preview */}
             {state.milestones_preview && state.milestones_preview.length > 0 && (
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-2">
-                  Milestones Preview
+                <h3 className="mb-2 text-caption-1-medium tracking-wide text-text-tertiary uppercase">
+                  Milestones preview
                 </h3>
                 <div className="space-y-2">
                   {state.milestones_preview.map((milestone, index) => (
-                    <div key={index} className="p-2 rounded border text-sm">
-                      <p className="font-medium">{milestone.title}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
+                    <motion.div
+                      key={index}
+                      initial={FIELD_HIDDEN}
+                      animate={FIELD_SHOWN}
+                      transition={{ ...FIELD_TRANSITION, delay: index * 0.04 }}
+                      className="rounded-xl border border-border-button-default bg-background-secondary-default/60 p-3"
+                    >
+                      <p className="text-body-medium text-text-primary">{milestone.title}</p>
+                      <p className="mt-1 text-caption-1-regular text-text-secondary">
                         {milestone.description}
                       </p>
                       {state.duration_days && (
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="mt-1 text-caption-1-regular text-text-tertiary">
                           Day {milestone.relative_day_offset} of {state.duration_days}
                         </p>
                       )}
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </div>
@@ -412,55 +370,47 @@ export function GoalPlannerChat() {
 
             {/* Completion Status */}
             {isComplete && (
-              <div className="pt-4 border-t space-y-2">
-                <div className="flex items-center gap-2 text-sm text-green-600">
-                  <CheckCircle2 className="h-4 w-4" />
-                  <span>Ready to create goal</span>
+              <motion.div
+                initial={FIELD_HIDDEN}
+                animate={FIELD_SHOWN}
+                transition={FIELD_TRANSITION}
+                className="space-y-3 border-t border-separator-border pt-4"
+              >
+                <div className="flex items-center gap-2">
+                  <RiCheckboxCircleFill className="size-4 text-status-lime-text" aria-hidden />
+                  <span className="text-body-medium text-text-primary">Ready to create goal</span>
                 </div>
                 <div className="flex flex-col gap-2">
                   <Button
+                    variant="primary"
                     onClick={() => handleCreateGoal('active')}
                     disabled={createGoalMutation.isPending}
                     className="w-full"
                   >
-                    {createGoalMutation.isPending ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Creating...
-                      </>
-                    ) : (
-                      'Create Active Goal'
-                    )}
+                    {createGoalMutation.isPending ? 'Creating…' : 'Create Active Goal'}
                   </Button>
                   <Button
+                    variant="secondary"
                     onClick={() => handleCreateGoal('draft')}
                     disabled={createGoalMutation.isPending}
-                    variant="outline"
                     className="w-full"
                   >
-                    {createGoalMutation.isPending ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Creating...
-                      </>
-                    ) : (
-                      'Save as Draft'
-                    )}
+                    {createGoalMutation.isPending ? 'Creating…' : 'Save as Draft'}
                   </Button>
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Missing Fields Hint */}
             {!isComplete && state.missing_fields.length > 0 && (
-              <div className="pt-4 border-t">
-                <p className="text-xs text-muted-foreground">
+              <div className={cx('border-t border-separator-border pt-4')}>
+                <p className="text-caption-1-regular text-text-tertiary">
                   Consider sharing: {state.missing_fields.join(', ')}
                 </p>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Goal Shaping Modal */}
@@ -478,4 +428,3 @@ export function GoalPlannerChat() {
     </div>
   )
 }
-

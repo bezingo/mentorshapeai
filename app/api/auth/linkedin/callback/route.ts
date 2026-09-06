@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/clerk'
+import { requireAuth } from '@/lib/auth-helpers'
 import { getLinkedInAccessToken, fetchLinkedInProfile, getLinkedInProfileUrl } from '@/lib/linkedin'
 import { scrapeLinkedInProfileWithApify, convertApifyToProfile } from '@/lib/apify'
 

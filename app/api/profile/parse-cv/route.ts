@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { requireAuth, getProfileId } from '@/lib/clerk'
+import { requireAuth, getProfileId } from '@/lib/auth-helpers'
 import { extractTextFromFile, MAX_FILE_SIZE } from '@/lib/pdf-parser'
 import { parseProfileText } from '@/lib/ai/profile-builder'
 

@@ -14,9 +14,8 @@ import { SkillsSection } from '@/components/profile/skills-section'
 import { ProfileImportSection } from '@/components/profile/profile-import-section'
 import { MentorFieldsSection } from '@/components/profile/mentor-fields-section'
 import { PublicHandleSection } from '@/components/profile/public-handle-section'
-import { Card, CardContent } from '@/components/ui/card'
-import { Loader2 } from 'lucide-react'
-import { useUser } from '@clerk/nextjs'
+import { AgentThinking } from '@/components/application/agent-thinking/agent-thinking'
+import { useSession } from '@/lib/auth-client'
 import type { WorkExperience } from '@/components/profile/work-history-section'
 import type { Education } from '@/components/profile/education-section'
 import type { Skill } from '@/components/profile/skills-section'
@@ -223,7 +222,7 @@ async function deleteSkill(id: string): Promise<void> {
 }
 
 export default function ProfileEditPage() {
-  const { user } = useUser()
+  const { data: session } = useSession()
   const queryClient = useQueryClient()
 
   // Fetch profile data
@@ -430,54 +429,54 @@ export default function ProfileEditPage() {
     await updateMutation.mutateAsync({ skills_public: isPublic })
   }
 
-  // Get user email from Clerk
-  const userEmail = user?.primaryEmailAddress?.emailAddress || ''
+  // Get user email from session
+  const userEmail = session?.user?.email || ''
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="flex min-h-[400px] items-center justify-center">
+        <AgentThinking variant="spin" label="Loading your profile" />
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-destructive">Failed to load profile. Please try again.</p>
+      <div className="flex min-h-[400px] items-center justify-center">
+        <p className="text-body-regular text-status-rose-text">
+          Failed to load profile. Please try again.
+        </p>
       </div>
     )
   }
 
   if (!profile) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Profile not found.</p>
+      <div className="flex min-h-[400px] items-center justify-center">
+        <p className="text-body-regular text-text-secondary">Profile not found.</p>
       </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr_300px] gap-6">
-      {/* Left: Navigation Sidebar */}
-      <div className="hidden lg:block">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[240px_1fr_300px]">
+      {/* Left: Navigation Sidebar (renders its own mobile drawer + toggle) */}
+      <div>
         <ProfileNavSidebar />
       </div>
 
       {/* Center: Main Content */}
       <div className="space-y-6">
         {/* Page Title */}
-        <h1 className="text-2xl font-bold">Edit Profile</h1>
+        <h1 className="text-title-1-medium text-text-primary">Edit Profile</h1>
 
         {/* Import Section */}
         <ProfileImportSection onImportSuccess={handleImportSuccess} />
 
         {/* Avatar Section */}
-        <Card>
-          <CardContent className="pt-6">
-            <AvatarUploadSection avatarUrl={profile.avatar_url} onUpload={handleAvatarUpload} />
-          </CardContent>
-        </Card>
+        <div className="rounded-3xl border border-border-button-default bg-background-primary-default p-6 shadow-xs">
+          <AvatarUploadSection avatarUrl={profile.avatar_url} onUpload={handleAvatarUpload} />
+        </div>
 
         {/* Personal Info Section */}
         <PersonalInfoSection
@@ -584,11 +583,6 @@ export default function ProfileEditPage() {
           educationsCount={profile.educations?.length || 0}
           skillsCount={profile.skills?.length || 0}
         />
-      </div>
-
-      {/* Mobile Navigation */}
-      <div className="lg:hidden">
-        <ProfileNavSidebar />
       </div>
     </div>
   )

@@ -18,8 +18,8 @@ import { NextRequest } from 'next/server'
 
 // Mock Clerk authentication
 vi.mock('@clerk/nextjs/server', () => ({
-  auth: vi.fn(),
-  currentUser: vi.fn(),
+  getSession: vi.fn(),
+  getAuthUserId: vi.fn(),
 }))
 
 vi.mock('@/lib/clerk', async () => {

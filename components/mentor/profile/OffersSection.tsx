@@ -161,16 +161,19 @@ function EmptyState() {
 }
 
 /**
- * Display public consultation offerings with booking CTAs.
- * Shows active offers with price, duration, and "Request" or "Book Now" buttons.
+ * Display public collaboration offerings with booking CTAs.
+ * Shows only free collaboration offers (school-pilot mode - paid consults are disabled).
+ * "Request Mentorship" CTA for starting a collab.
  */
 export function OffersSection({
   offers,
   onSelectOffer,
   className,
 }: OffersSectionProps) {
+  // Filter to only show free_collab offers (M0 school-pilot: no paid consults or digital products)
+  const freeCollabOffers = offers.filter((offer) => offer.type === 'free_collab')
   // Sort offers by sort_order
-  const sortedOffers = [...offers].sort((a, b) => a.sort_order - b.sort_order)
+  const sortedOffers = [...freeCollabOffers].sort((a, b) => a.sort_order - b.sort_order)
 
   return (
     <div className={cn('space-y-4', className)}>

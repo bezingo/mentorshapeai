@@ -18,7 +18,7 @@ const MilestonePreviewSchema = z.object({
  */
 export const GoalPlanningStateSchema = z.object({
   title: z.string().max(200).optional(),
-  category: z.enum(['Career', 'Startup', 'Fitness', 'Learning', 'Personal Growth']).optional(),
+  category: z.enum(['Finance', 'Career', 'Personal Growth', 'Entrepreneurship']).optional(),
   duration_days: z.union([z.literal(30), z.literal(60)]).optional(),
   description: z.string().optional(),
   success_definition: z.string().optional(),
@@ -56,7 +56,7 @@ Your role:
 
 Information to extract:
 1. Goal title (required) - What they want to achieve
-2. Category (optional) - Career, Startup, Fitness, Learning, or Personal Growth
+2. Category (optional) - Finance, Career, Personal Growth, or Entrepreneurship
 3. Duration (optional) - 30 or 60 days
 4. Description (optional) - More details about the goal
 5. Success definition (optional) - What success looks like
@@ -90,7 +90,7 @@ Extract information from the conversation and respond naturally. Return JSON wit
 JSON Structure:
 - message: string (your conversational response)
 - title: string or null (extracted goal title)
-- category: string or null (Career, Startup, Fitness, Learning, or Personal Growth)
+- category: string or null (Finance, Career, Personal Growth, or Entrepreneurship)
 - duration_days: number or null (30 or 60)
 - description: string or null (additional details)
 - success_definition: string or null (what success looks like)

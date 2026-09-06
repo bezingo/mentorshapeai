@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getCurrentProfile } from '@/lib/clerk'
+import { getCurrentProfile } from '@/lib/auth-helpers'
 import { createServiceClient } from '@/lib/supabase/service'
 import { z } from 'zod'
 

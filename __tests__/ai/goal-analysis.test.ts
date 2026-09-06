@@ -107,14 +107,14 @@ describe.skipIf(!shouldRunAITests)('Goal Analysis AI Agent', () => {
   describe('generateSWOTAnalysis', () => {
     it('should generate SWOT analysis with all four categories', async () => {
       const input: SWOTAnalysisInput = {
-        title: 'Learn React',
-        description: 'Master React fundamentals',
-        current_challenges: 'No prior experience',
+        title: 'Build Personal Finance Plan',
+        description: 'Master budgeting and investing fundamentals',
+        current_challenges: 'No prior finance experience',
         milestones: [
           { title: 'Week 1', description: 'Learn basics' },
-          { title: 'Week 2', description: 'Build project' },
+          { title: 'Week 2', description: 'Create budget' },
         ],
-        category: 'Learning',
+        category: 'Finance',
       }
 
       const result = await generateSWOTAnalysis(input)
@@ -130,7 +130,7 @@ describe.skipIf(!shouldRunAITests)('Goal Analysis AI Agent', () => {
 
     it('should handle missing optional fields gracefully', async () => {
       const input: SWOTAnalysisInput = {
-        title: 'Improve Fitness',
+        title: 'Develop Leadership Skills',
       }
 
       const result = await generateSWOTAnalysis(input)
@@ -148,7 +148,7 @@ describe.skipIf(!shouldRunAITests)('Goal Analysis AI Agent', () => {
         description: 'Build and launch a SaaS product',
         success_definition: '100 paying customers',
         duration_days: 60,
-        category: 'Startup',
+        category: 'Entrepreneurship',
       }
 
       const result = await generateSMARTFramework(input)
