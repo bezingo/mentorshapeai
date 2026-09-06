@@ -1,75 +1,8 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import {
-  Target,
-  Users,
-  Calendar,
-  UserCircle,
-  Settings,
-  Clock,
-  Package,
-  GraduationCap,
-  Plus,
-  ArrowRight,
-} from 'lucide-react'
 import { getCurrentProfile, getSession } from '@/lib/auth-helpers'
 import { getOrgMembership } from '@/lib/auth/org-access'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { FeatureHub, type FeatureCardData } from '@/components/dashboard/feature-hub'
 import { BecomeMentorCard } from '@/components/mentor/BecomeMentorCard'
-
-interface FeatureLink {
-  label: string
-  href: string
-  icon: React.ComponentType<{ className?: string }>
-}
-
-interface FeatureCard {
-  title: string
-  description: string
-  icon: React.ComponentType<{ className?: string }>
-  links: FeatureLink[]
-}
-
-function FeatureHubCard({ feature }: { feature: FeatureCard }) {
-  const Icon = feature.icon
-  return (
-    <Card className="flex flex-col">
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <Icon className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <CardTitle className="text-lg">{feature.title}</CardTitle>
-          </div>
-        </div>
-        <CardDescription>{feature.description}</CardDescription>
-      </CardHeader>
-      <CardContent className="mt-auto space-y-2">
-        {feature.links.map((link) => {
-          const LinkIcon = link.icon
-          return (
-            <Button
-              key={link.href}
-              asChild
-              variant="outline"
-              className="w-full justify-between"
-            >
-              <Link href={link.href}>
-                <span className="flex items-center gap-2">
-                  <LinkIcon className="h-4 w-4" />
-                  {link.label}
-                </span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          )
-        })}
-      </CardContent>
-    </Card>
-  )
-}
 
 export default async function DashboardPage() {
   // Check authentication first
@@ -87,16 +20,16 @@ export default async function DashboardPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Error setting up profile</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-title-1-medium text-text-primary">Error setting up profile</h1>
+          <p className="mt-1 text-body-regular text-text-secondary">
             We couldn&apos;t create your profile. Please try refreshing the page.
           </p>
         </div>
-        <Card className="p-6">
-          <p className="text-sm text-muted-foreground">
+        <div className="rounded-3xl border border-border-button-default bg-background-primary-default p-6 shadow-xs">
+          <p className="text-body-regular text-text-secondary">
             If this issue persists, please contact support.
           </p>
-        </Card>
+        </div>
       </div>
     )
   }
@@ -105,16 +38,16 @@ export default async function DashboardPage() {
   const orgMembership = await getOrgMembership(profile.id)
   const isCounselor = orgMembership?.role === 'admin'
 
-  const features: FeatureCard[] = []
+  const features: FeatureCardData[] = []
 
   if (profile.is_mentee) {
     features.push({
       title: 'My Goals',
       description: 'Set, track, and achieve your personal and professional goals.',
-      icon: Target,
+      icon: 'target',
       links: [
-        { label: 'View Goals', href: '/dashboard/mentee/goals', icon: Target },
-        { label: 'Create New Goal', href: '/dashboard/mentee/goals/new', icon: Plus },
+        { label: 'View Goals', href: '/dashboard/mentee/goals', icon: 'target' },
+        { label: 'Create New Goal', href: '/dashboard/mentee/goals/new', icon: 'plus' },
       ],
     })
   }
@@ -122,28 +55,26 @@ export default async function DashboardPage() {
   features.push({
     title: 'Collaborations',
     description: 'Your mentoring relationships and shared progress.',
-    icon: Users,
-    links: [
-      { label: 'View Collaborations', href: '/dashboard/collaborations', icon: Users },
-    ],
+    icon: 'users',
+    links: [{ label: 'View Collaborations', href: '/dashboard/collaborations', icon: 'users' }],
   })
 
   features.push({
     title: 'Focuses',
     description: 'Focus sessions and areas you are working on with mentors.',
-    icon: Calendar,
-    links: [{ label: 'View Focuses', href: '/dashboard/focuses', icon: Calendar }],
+    icon: 'calendar',
+    links: [{ label: 'View Focuses', href: '/dashboard/focuses', icon: 'calendar' }],
   })
 
   if (profile.is_mentor) {
     features.push({
       title: 'Mentor Area',
       description: 'Manage your mentees, availability, and mentoring offers.',
-      icon: Users,
+      icon: 'users',
       links: [
-        { label: 'Mentor Dashboard', href: '/dashboard/mentor', icon: Users },
-        { label: 'Availability', href: '/dashboard/mentor/availability', icon: Clock },
-        { label: 'Offers', href: '/dashboard/mentor/offers', icon: Package },
+        { label: 'Mentor Dashboard', href: '/dashboard/mentor', icon: 'users' },
+        { label: 'Availability', href: '/dashboard/mentor/availability', icon: 'clock' },
+        { label: 'Offers', href: '/dashboard/mentor/offers', icon: 'package' },
       ],
     })
   }
@@ -152,11 +83,11 @@ export default async function DashboardPage() {
     features.push({
       title: 'Counselor Area',
       description: `School tools for ${orgMembership?.org.name ?? 'your organization'}: rosters, pairs, and reports.`,
-      icon: GraduationCap,
+      icon: 'graduation',
       links: [
-        { label: 'Counselor Dashboard', href: '/dashboard/counselor', icon: GraduationCap },
-        { label: 'Mentor–Mentee Pairs', href: '/dashboard/counselor/pairs', icon: Users },
-        { label: 'Import Roster (CSV)', href: '/dashboard/counselor/import', icon: Plus },
+        { label: 'Counselor Dashboard', href: '/dashboard/counselor', icon: 'graduation' },
+        { label: 'Mentor–Mentee Pairs', href: '/dashboard/counselor/pairs', icon: 'users' },
+        { label: 'Import Roster (CSV)', href: '/dashboard/counselor/import', icon: 'plus' },
       ],
     })
   }
@@ -164,10 +95,10 @@ export default async function DashboardPage() {
   features.push({
     title: 'Profile & Settings',
     description: 'Update your public profile and account preferences.',
-    icon: UserCircle,
+    icon: 'user',
     links: [
-      { label: 'My Profile', href: '/dashboard/profile', icon: UserCircle },
-      { label: 'Settings', href: '/dashboard/settings', icon: Settings },
+      { label: 'My Profile', href: '/dashboard/profile', icon: 'user' },
+      { label: 'Settings', href: '/dashboard/settings', icon: 'settings' },
     ],
   })
 
@@ -176,21 +107,15 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Welcome back, {displayName}!</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-title-1-medium text-text-primary">Welcome back, {displayName}!</h1>
+        <p className="mt-1 text-body-regular text-text-secondary">
           Everything Mentorshape offers, in one place. Pick up where you left off.
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {features.map((feature) => (
-          <FeatureHubCard key={feature.title} feature={feature} />
-        ))}
-      </div>
+      <FeatureHub features={features} />
 
-      {profile.is_mentee && !profile.is_mentor && (
-        <BecomeMentorCard compact />
-      )}
+      {profile.is_mentee && !profile.is_mentor && <BecomeMentorCard compact />}
     </div>
   )
 }

@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist_Mono, Inter } from "next/font/google";
 import { I18nProvider } from "@/lib/i18n";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
-import "./globals.css";
+import "@/styles/globals.css";
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+// BoardUI's type scale resolves --font-inter (see styles/theme.css); the
+// legacy shadcn layer maps its --font-sans to the same variable.
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -35,9 +32,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <head>
+        {/* Restore the persisted BoardUI theme before first paint. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.getItem("boardui:theme")==="dark")document.documentElement.classList.add("dark")}catch(e){}`,
+          }}
+        />
+      </head>
+      <body className={`${geistMono.variable} antialiased`}>
         <I18nProvider>
           <ServiceWorkerRegistration />
           {children}

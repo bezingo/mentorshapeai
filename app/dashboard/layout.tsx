@@ -24,9 +24,9 @@ export default async function DashboardLayout({
 
   return (
     <QueryProvider>
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen bg-background-full">
         <DashboardSidebar roles={roles} />
-        <div className="flex-1 lg:pl-64">
+        <div className="min-w-0 flex-1 lg:pl-64">
           <DashboardHeader />
           <main className="p-6">{children}</main>
         </div>

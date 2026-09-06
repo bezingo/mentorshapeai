@@ -31,7 +31,7 @@ interface RiskPitfall {
   mitigation: string
 }
 
-interface GoalShapedData {
+export interface GoalShapedData {
   refined_goal_statement: string
   success_definition?: string
   milestones: Milestone[]
