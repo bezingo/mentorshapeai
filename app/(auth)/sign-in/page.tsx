@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { signIn } from '@/lib/auth-client'
 import { Button } from '@/components/ui/button'
@@ -11,8 +11,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, Mail, Lock, AlertCircle } from 'lucide-react'
 
-export default function SignInPage() {
+function SignInForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Honor the `redirect` param set by the route-protection proxy,
+  // but only allow same-origin relative paths.
+  const redirectParam = searchParams.get('redirect')
+  const redirectTo =
+    redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')
+      ? redirectParam
+      : '/dashboard'
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -33,7 +43,7 @@ export default function SignInPage() {
       if (result.error) {
         setError(result.error.message || 'Invalid email or password')
       } else {
-        router.push('/dashboard')
+        router.push(redirectTo)
         router.refresh()
       }
     } catch (err) {
@@ -50,7 +60,7 @@ export default function SignInPage() {
     try {
       await signIn.social({
         provider: 'google',
-        callbackURL: '/dashboard',
+        callbackURL: redirectTo,
       })
     } catch (err) {
       setError('Failed to sign in with Google')
@@ -170,5 +180,14 @@ export default function SignInPage() {
         </CardFooter>
       </Card>
     </div>
+  )
+}
+
+export default function SignInPage() {
+  // useSearchParams requires a Suspense boundary for prerendering
+  return (
+    <Suspense fallback={null}>
+      <SignInForm />
+    </Suspense>
   )
 }
