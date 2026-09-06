@@ -8,7 +8,6 @@ import {
   Users, 
   Calendar, 
   Settings,
-  Building2,
   Menu,
   X,
   Clock,
@@ -20,11 +19,13 @@ import { Separator } from '@/components/ui/separator'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 
+type NavRole = 'mentor' | 'mentee' | 'counselor'
+
 interface NavItem {
   title: string
   href: string
   icon: React.ComponentType<{ className?: string }>
-  roles?: ('mentor' | 'mentee')[]
+  roles?: NavRole[]
   indent?: boolean
 }
 
@@ -71,14 +72,10 @@ const navItems: NavItem[] = [
     indent: true,
   },
   {
-    title: 'Organizations',
-    href: '/dashboard/org',
-    icon: Building2,
-  },
-  {
     title: 'Counselor',
     href: '/dashboard/counselor',
     icon: GraduationCap,
+    roles: ['counselor'],
   },
   {
     title: 'Settings',
@@ -87,9 +84,19 @@ const navItems: NavItem[] = [
   },
 ]
 
-export function DashboardSidebar() {
+interface DashboardSidebarProps {
+  roles?: NavRole[]
+}
+
+export function DashboardSidebar({ roles }: DashboardSidebarProps) {
   const pathname = usePathname()
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+
+  // When roles are unknown (not passed), show role-agnostic items only
+  const userRoles = roles ?? ['mentee']
+  const visibleItems = navItems.filter(
+    (item) => !item.roles || item.roles.some((role) => userRoles.includes(role))
+  )
 
   return (
     <>
@@ -118,7 +125,7 @@ export function DashboardSidebar() {
             </Link>
           </div>
           <nav className="flex-1 space-y-1 p-4">
-            {navItems.map((item) => {
+            {visibleItems.map((item) => {
               const Icon = item.icon
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
               
