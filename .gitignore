@@ -36,6 +36,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# IDE
-.claude/
-.cursor/
+# IDE (keep BoardUI agent skill + rules tracked)
+.claude/*
+!.claude/skills/
+.cursor/*
+!.cursor/rules/
