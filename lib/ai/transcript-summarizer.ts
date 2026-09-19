@@ -3,6 +3,8 @@ import { ChatPromptTemplate } from '@langchain/core/prompts'
 import { JsonOutputParser } from '@langchain/core/output_parsers'
 import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
+import { getZoomClient } from '@/lib/zoom/client'
+import { downloadZoomTranscript } from '@/lib/zoom/transcript'
 
 /**
  * Schema for key decisions made during the focus
@@ -563,7 +565,15 @@ export async function fetchTranscriptFromZoom(focusId: string): Promise<string |
 
   const { data: focus, error } = await supabase
     .from('focuses')
-    .select('transcript_url')
+    .select(
+      `
+      id,
+      transcript_url,
+      collaboration:collaborations!focuses_collaboration_id_fkey(
+        mentor_profile_id
+      )
+    `
+    )
     .eq('id', focusId)
     .single()
 
@@ -571,11 +581,27 @@ export async function fetchTranscriptFromZoom(focusId: string): Promise<string |
     return null
   }
 
-  // TODO: Implement actual transcript fetching from Zoom
-  // This would involve using the Zoom API to download the transcript
-  // For now, return null to indicate transcript needs to be provided manually
-  console.log('Transcript URL available:', focus.transcript_url)
-  return null
+  const collaboration = Array.isArray(focus.collaboration)
+    ? focus.collaboration[0]
+    : focus.collaboration
+
+  if (!collaboration?.mentor_profile_id) {
+    console.error(`No mentor profile for focus ${focusId}`)
+    return null
+  }
+
+  const zoomClient = await getZoomClient(collaboration.mentor_profile_id)
+  if (!zoomClient) {
+    console.error(`No Zoom connection for mentor on focus ${focusId}`)
+    return null
+  }
+
+  try {
+    return await downloadZoomTranscript(zoomClient, focus.transcript_url)
+  } catch (err) {
+    console.error(`Failed to fetch Zoom transcript for focus ${focusId}:`, err)
+    return null
+  }
 }
 
 /**
@@ -584,21 +610,11 @@ export async function fetchTranscriptFromZoom(focusId: string): Promise<string |
  * 
  * @returns boolean indicating if summary was generated
  */
-export async function autoGenerateSummaryAfterFocus(focusId: string): Promise<boolean> {
-  try {
-    // Try to fetch transcript from Zoom
-    const transcript = await fetchTranscriptFromZoom(focusId)
-
-    if (!transcript) {
-      console.log(`No transcript available for focus ${focusId} - skipping auto-summary`)
-      return false
-    }
-
-    await generateAndSaveFocusSummary(focusId, transcript, true)
-    console.log(`Auto-generated summary for focus ${focusId}`)
-    return true
-  } catch (err) {
-    console.error(`Failed to auto-generate summary for focus ${focusId}:`, err)
-    return false
-  }
+export async function autoGenerateSummaryAfterFocus(
+  focusId: string,
+  triggerEvent: 'recording.completed' | 'meeting.ended' | 'manual' = 'manual'
+): Promise<boolean> {
+  const { enqueueFocusSummaryJob } = await import('@/lib/jobs/focus-summary-jobs')
+  const { enqueued } = await enqueueFocusSummaryJob(focusId, triggerEvent)
+  return enqueued
 }
