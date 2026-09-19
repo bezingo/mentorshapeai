@@ -7,7 +7,10 @@ const isPublicRoute = createRouteMatcher([
   '/g/(.*)', // Public goal pages
   '/m/(.*)', // Public mentor pages
   '/pricing',
-  '/api/webhook/(.*)', // Webhook endpoints (handled separately)
+  '/api/webhook/(.*)', // Legacy webhook path
+  '/api/webhooks/(.*)', // Zoom and other webhooks
+  '/api/mentor/calendar/webhook', // Google Calendar push notifications
+  '/api/cron/(.*)', // Cron jobs (Bearer CRON_SECRET in route handlers)
 ])
 
 const isDashboardRoute = createRouteMatcher([

@@ -6,6 +6,7 @@ import {
   getZoomClient,
   getZoomRecordings,
 } from '@/lib/zoom/client'
+import { enqueueFocusSummaryJob } from '@/lib/jobs/focus-summary-jobs'
 
 /**
  * Zoom webhook event types we handle
@@ -122,9 +123,13 @@ export async function POST(request: NextRequest) {
 
         console.log(`Focus ${focus.id} marked as completed`)
 
-        // TODO: Trigger AI summary generation
-        // This could be done via a background job or queue
-        // For now, we'll let the user manually trigger it
+        const { enqueued, jobId } = await enqueueFocusSummaryJob(
+          focus.id,
+          'meeting.ended'
+        )
+        if (enqueued) {
+          console.log(`Enqueued focus summary job ${jobId} for focus ${focus.id}`)
+        }
       }
 
       return NextResponse.json({ received: true, focus_id: focus.id })
@@ -210,8 +215,17 @@ export async function POST(request: NextRequest) {
 
         console.log(`Recording URLs updated for focus ${focus.id}`)
 
-        // TODO: If transcript is available, trigger AI summary generation
-        // This would download the transcript and process it
+        if (transcriptFile?.download_url) {
+          const { enqueued, jobId } = await enqueueFocusSummaryJob(
+            focus.id,
+            'recording.completed'
+          )
+          if (enqueued) {
+            console.log(
+              `Enqueued focus summary job ${jobId} for focus ${focus.id} (recording.completed)`
+            )
+          }
+        }
       } catch (error) {
         console.error('Failed to fetch recording details:', error)
       }
