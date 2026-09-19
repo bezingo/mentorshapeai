@@ -63,7 +63,6 @@ const navSections: NavSection[] = [
         title: 'Payments',
         href: '/dashboard/profile/payments',
         icon: CreditCard,
-        disabled: true,
       },
       {
         title: 'Taxes',
@@ -75,7 +74,6 @@ const navSections: NavSection[] = [
         title: 'Transactions',
         href: '/dashboard/profile/transactions',
         icon: Wallet,
-        disabled: true,
       },
     ],
   },
