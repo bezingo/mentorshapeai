@@ -2,6 +2,8 @@ import { NextResponse, NextRequest } from 'next/server'
 import { ensureUserAndProfile, requireAuth } from '@/lib/clerk'
 import { createServiceClient } from '@/lib/supabase/service'
 import { z } from 'zod'
+import { getPaymentRequiredForMentor } from '@/lib/payments/offers'
+import { syncMentorOfferStripeCatalog } from '@/lib/payments/sync-offer-stripe'
 
 /**
  * Valid mentor offer types
@@ -135,8 +137,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // For paid offers, set payment_required=true since Stripe Connect is deferred to Phase 4
-    const payment_required = type === 'paid_consult'
+    const payment_required = await getPaymentRequiredForMentor(profile.id, type)
 
     const serviceSupabase = createServiceClient()
 
@@ -183,7 +184,25 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({ data: newOffer }, { status: 201 })
+    const stripeSync = await syncMentorOfferStripeCatalog(profile.id, {
+      id: newOffer.id,
+      type: newOffer.type,
+      title: newOffer.title,
+      description: newOffer.description,
+      price_cents: newOffer.price_cents,
+      currency: newOffer.currency,
+      stripe_product_id: newOffer.stripe_product_id,
+      stripe_price_id: newOffer.stripe_price_id,
+    })
+
+    const responseOffer = {
+      ...newOffer,
+      payment_required: stripeSync.payment_required,
+      stripe_product_id: stripeSync.stripe_product_id ?? newOffer.stripe_product_id,
+      stripe_price_id: stripeSync.stripe_price_id ?? newOffer.stripe_price_id,
+    }
+
+    return NextResponse.json({ data: responseOffer }, { status: 201 })
   } catch (error: unknown) {
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json(

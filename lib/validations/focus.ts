@@ -43,6 +43,7 @@ export const BookFocusSchema = z.object({
   // Optional fields for future calendar/meeting integration
   meeting_url: z.string().url('Invalid meeting URL').nullable().optional(),
   meeting_provider: z.enum(['zoom', 'google_meet', 'teams']).nullable().optional(),
+  mentor_offer_id: z.string().uuid('Invalid mentor offer id').optional(),
 })
 
 export type BookFocusInput = z.infer<typeof BookFocusSchema>

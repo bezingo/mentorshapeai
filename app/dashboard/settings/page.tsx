@@ -44,19 +44,21 @@ export default function SettingsPage() {
           </div>
         </Card>
 
-        <Card className="p-6 opacity-50">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-lg bg-muted">
-              <CreditCard className="h-6 w-6" />
+        <Link href="/dashboard/settings/billing">
+          <Card className="p-6 hover:bg-muted/50 transition-colors cursor-pointer">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-primary/10">
+                <CreditCard className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-lg font-semibold">Billing</h2>
+                <p className="text-sm text-muted-foreground">
+                  Subscription plans and payment profile (Clerk Billing)
+                </p>
+              </div>
             </div>
-            <div className="flex-1">
-              <h2 className="text-lg font-semibold">Billing</h2>
-              <p className="text-sm text-muted-foreground">
-                Coming soon...
-              </p>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </Link>
       </div>
     </div>
   )
