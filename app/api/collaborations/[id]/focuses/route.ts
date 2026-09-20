@@ -9,6 +9,10 @@ import {
   doFocusTimesOverlap,
 } from '@/lib/validations/focus'
 import { getZoomClient, createZoomMeeting } from '@/lib/zoom/client'
+import { isStripeConfigured } from '@/lib/stripe/config'
+import { getMentorConnectStatus } from '@/lib/stripe/connect'
+import { createOfferPaymentIntent } from '@/lib/stripe/payment-intents'
+import { createTransactionRecord } from '@/lib/payments/transactions'
 
 /**
  * GET /api/collaborations/[id]/focuses
@@ -195,8 +199,13 @@ export async function POST(
       )
     }
 
-    const { scheduled_at, duration_minutes, meeting_url, meeting_provider } =
-      parseResult.data
+    const {
+      scheduled_at,
+      duration_minutes,
+      meeting_url,
+      meeting_provider,
+      mentor_offer_id,
+    } = parseResult.data
 
     const supabase = createServiceClient()
 
@@ -398,6 +407,87 @@ export async function POST(
       )
     }
 
+    let paidOffer: {
+      id: string
+      price_cents: number
+      currency: string
+      payment_required: boolean
+      type: string
+    } | null = null
+
+    if (mentor_offer_id) {
+      const { data: offer, error: offerError } = await supabase
+        .from('mentor_offers')
+        .select('id, mentor_profile_id, type, price_cents, currency, payment_required, is_active')
+        .eq('id', mentor_offer_id)
+        .single()
+
+      if (offerError || !offer) {
+        return NextResponse.json(
+          { error: { code: 'OFFER_NOT_FOUND', message: 'Mentor offer not found' } },
+          { status: 404 }
+        )
+      }
+
+      if (offer.mentor_profile_id !== collaboration.mentor_profile_id) {
+        return NextResponse.json(
+          {
+            error: {
+              code: 'INVALID_OFFER',
+              message: 'Offer does not belong to this collaboration mentor',
+            },
+          },
+          { status: 400 }
+        )
+      }
+
+      if (!offer.is_active || offer.type !== 'paid_consult') {
+        return NextResponse.json(
+          {
+            error: {
+              code: 'INVALID_OFFER',
+              message: 'Only active paid consultation offers can be used for payment',
+            },
+          },
+          { status: 400 }
+        )
+      }
+
+      if (offer.payment_required) {
+        return NextResponse.json(
+          {
+            error: {
+              code: 'PAYMENT_SETUP_REQUIRED',
+              message: 'Mentor has not completed payment setup for this offer',
+            },
+          },
+          { status: 402 }
+        )
+      }
+
+      if (!isStripeConfigured() || !offer.price_cents) {
+        return NextResponse.json(
+          {
+            error: {
+              code: 'PAYMENT_UNAVAILABLE',
+              message: 'Paid booking is not available in this environment',
+            },
+          },
+          { status: 503 }
+        )
+      }
+
+      paidOffer = {
+        id: offer.id,
+        price_cents: offer.price_cents,
+        currency: offer.currency ?? 'usd',
+        payment_required: offer.payment_required,
+        type: offer.type,
+      }
+    }
+
+    const initialFocusStatus = paidOffer ? 'pending_payment' : 'scheduled'
+
     // Create the focus
     const { data: newFocus, error: createError } = await supabase
       .from('focuses')
@@ -405,7 +495,7 @@ export async function POST(
         collaboration_id: collaborationId,
         scheduled_at,
         duration_minutes,
-        status: 'scheduled',
+        status: initialFocusStatus,
         meeting_url: meeting_url || null,
         meeting_provider: meeting_provider || null,
       })
@@ -420,12 +510,82 @@ export async function POST(
       )
     }
 
-    // Auto-create Zoom meeting if mentor has Zoom connected
+    let payment: {
+      client_secret: string | null
+      payment_intent_id: string
+      publishable_key: string | null
+    } | null = null
+
+    if (paidOffer && isMentee) {
+      const connect = await getMentorConnectStatus(collaboration.mentor_profile_id)
+      if (!connect.account_id || !connect.ready_for_payments) {
+        await supabase.from('focuses').delete().eq('id', newFocus.id)
+        return NextResponse.json(
+          {
+            error: {
+              code: 'PAYMENT_SETUP_REQUIRED',
+              message: 'Mentor payment account is not ready',
+            },
+          },
+          { status: 402 }
+        )
+      }
+
+      try {
+        const intent = await createOfferPaymentIntent({
+          amountCents: paidOffer.price_cents,
+          currency: paidOffer.currency,
+          mentorConnectAccountId: connect.account_id,
+          metadata: {
+            mentor_offer_id: paidOffer.id,
+            collaboration_id: collaborationId,
+            focus_id: newFocus.id,
+            buyer_profile_id: profile.id,
+            mentor_profile_id: collaboration.mentor_profile_id,
+          },
+        })
+
+        await createTransactionRecord({
+          buyer_profile_id: profile.id,
+          mentor_profile_id: collaboration.mentor_profile_id,
+          mentor_offer_id: paidOffer.id,
+          stripe_payment_intent_id: intent.payment_intent_id,
+          amount_cents: paidOffer.price_cents,
+          platform_fee_cents: intent.application_fee_cents,
+          status: 'pending',
+          focus_id: newFocus.id,
+        })
+
+        payment = {
+          client_secret: intent.client_secret,
+          payment_intent_id: intent.payment_intent_id,
+          publishable_key: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? null,
+        }
+      } catch (paymentError) {
+        console.error('Failed to create payment intent for focus:', paymentError)
+        await supabase.from('focuses').delete().eq('id', newFocus.id)
+        return NextResponse.json(
+          {
+            error: {
+              code: 'PAYMENT_INTENT_FAILED',
+              message: 'Failed to initialize payment for this booking',
+            },
+          },
+          { status: 500 }
+        )
+      }
+    }
+
+    // Auto-create Zoom meeting if mentor has Zoom connected (skip until payment completes)
     let zoomMeeting = null
     const mentorProfileForZoom = collaboration.mentor_profile as { display_name?: string } | null
     const menteeProfile = collaboration.mentee_profile as { display_name?: string } | null
 
     try {
+      if (paidOffer) {
+        throw new Error('skip_zoom_until_paid')
+      }
+
       const zoomClient = await getZoomClient(collaboration.mentor_profile_id)
 
       if (zoomClient) {
@@ -461,8 +621,15 @@ export async function POST(
         newFocus.meeting_provider = 'zoom'
       }
     } catch (zoomError) {
-      // Zoom meeting creation is not critical - log and continue
-      console.warn('Failed to create Zoom meeting:', zoomError)
+      if (
+        zoomError instanceof Error &&
+        zoomError.message === 'skip_zoom_until_paid'
+      ) {
+        // Zoom meeting is created after payment succeeds (future integration)
+      } else {
+        // Zoom meeting creation is not critical - log and continue
+        console.warn('Failed to create Zoom meeting:', zoomError)
+      }
     }
 
     // TODO: Future integrations:
@@ -475,6 +642,7 @@ export async function POST(
           ...newFocus,
           user_role: isMentor ? 'mentor' : 'mentee',
           zoom_created: !!zoomMeeting,
+          payment,
         },
       },
       { status: 201 }
