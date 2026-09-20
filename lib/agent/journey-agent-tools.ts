@@ -18,6 +18,22 @@ const tool = createToolHelper<JourneyAgentContext>()
 
 const artifactSchema = z.enum(['goals', 'vision-board', 'profile', 'matching'])
 
+/** Client tool names registered on `/journey` — keep in sync with HeroUI Agents dashboard. */
+export const JOURNEY_AGENT_TOOL_NAMES = [
+  'saveGoalDraft',
+  'navigateToArtifact',
+  'createGoalArtifact',
+  'lockGoal',
+  'openVisionBoard',
+  'getYearPlanRemaining',
+  'getMatchingSuggestions',
+  'draftOutreach',
+  'getUpcomingFocuses',
+  'publishOneLinkProfile',
+] as const
+
+export type JourneyAgentToolName = (typeof JOURNEY_AGENT_TOOL_NAMES)[number]
+
 /**
  * Single registry for HeroUI Agent client tools used on `/journey`.
  * Combines onboarding goal/artifact tools (`client-tools`) with matching/outreach/reminder APIs.
@@ -80,8 +96,14 @@ export function createJourneyAgentTools() {
         artifact: artifactSchema,
       }),
       execute: ({ artifact }, { router }) => {
-        const href = getArtifactRoute(artifact as JourneyArtifactKind)
+        const kind = artifact as JourneyArtifactKind
+        const href = getArtifactRoute(kind)
         router.push(href)
+        if (kind === 'vision-board') {
+          openVisionBoard({})
+        } else if (kind === 'matching' && typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('mentorshape:open-matching'))
+        }
         return { navigated: true, artifact, href }
       },
     }),
@@ -203,7 +225,7 @@ export function createJourneyAgentTools() {
       }),
       execute: async ({ withinDays, limit }) => {
         const params = new URLSearchParams()
-        if (withinDays != null) params.set('withinDays', String(withinDays))
+        if (withinDays != null) params.set('within_days', String(withinDays))
         if (limit != null) params.set('limit', String(limit))
         const response = await fetch(`/api/reminders/upcoming?${params}`)
         const json = await response.json()

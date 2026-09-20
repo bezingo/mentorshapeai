@@ -60,6 +60,12 @@ export function ArtifactPanel() {
   const [visionBoards, setVisionBoards] = useState<VisionBoardRow[]>([])
   const [activeBoard, setActiveBoard] = useState<VisionBoardRow | null>(null)
   const [showVisionBoard, setShowVisionBoard] = useState(false)
+  const [showMatching, setShowMatching] = useState(false)
+  const [matchingLoading, setMatchingLoading] = useState(false)
+  const [matchingError, setMatchingError] = useState<string | null>(null)
+  const [matchingRows, setMatchingRows] = useState<
+    { mentorProfileId: string; displayName: string | null; score: number; headline?: string | null }[]
+  >([])
 
   const loadGoals = useCallback(async () => {
     setLoadingGoals(true)
@@ -83,6 +89,29 @@ export function ArtifactPanel() {
     loadVisionBoards()
   }, [loadGoals, loadVisionBoards])
 
+  const loadMatching = useCallback(async () => {
+    setMatchingLoading(true)
+    setMatchingError(null)
+    try {
+      const res = await fetch('/api/matching/suggestions?limit=8')
+      const json = await res.json()
+      if (!res.ok) {
+        setMatchingError(json.error?.message ?? 'Could not load matches')
+        setMatchingRows([])
+        return
+      }
+      const suggestions = (json.data?.suggestions ?? []) as {
+        mentorProfileId: string
+        displayName: string | null
+        score: number
+        headline?: string | null
+      }[]
+      setMatchingRows(suggestions)
+    } finally {
+      setMatchingLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     const handler = (event: Event) => {
       const detail = (event as CustomEvent<{ visionBoardId?: string; goalId?: string }>).detail
@@ -96,6 +125,15 @@ export function ArtifactPanel() {
     window.addEventListener('mentorshape:open-vision-board', handler)
     return () => window.removeEventListener('mentorshape:open-vision-board', handler)
   }, [visionBoards])
+
+  useEffect(() => {
+    const openMatching = () => {
+      setShowMatching(true)
+      loadMatching()
+    }
+    window.addEventListener('mentorshape:open-matching', openMatching)
+    return () => window.removeEventListener('mentorshape:open-matching', openMatching)
+  }, [loadMatching])
 
   const loadHierarchy = useCallback(async (goalId: string) => {
     setHierarchyLoading(true)
@@ -264,6 +302,44 @@ export function ArtifactPanel() {
           readOnly={Boolean(selectedGoal?.is_locked)}
         />
       )}
+
+      <Separator />
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between gap-2">
+          <CardTitle>Mentor matches</CardTitle>
+          <Button size="sm" variant="ghost" onPress={() => { setShowMatching(true); loadMatching() }}>
+            Refresh
+          </Button>
+        </CardHeader>
+        <CardContent className="gap-2">
+          {!showMatching ? (
+            <p className="text-small text-default-500">
+              Ask the agent for matches, or open this panel from chat.
+            </p>
+          ) : matchingLoading ? (
+            <Spinner size="sm" />
+          ) : matchingError ? (
+            <p className="text-small text-danger">{matchingError}</p>
+          ) : matchingRows.length === 0 ? (
+            <p className="text-small text-default-500">No mentor suggestions yet — complete your profile and goals.</p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {matchingRows.map((row) => (
+                <li key={row.mentorProfileId} className="rounded-medium border border-default-200 p-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium">{row.displayName ?? 'Mentor'}</span>
+                    <Chip size="sm" color="accent" variant="soft">{Math.round(row.score)}</Chip>
+                  </div>
+                  {row.headline && (
+                    <p className="text-tiny text-default-500 mt-1">{row.headline}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
