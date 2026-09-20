@@ -19,6 +19,12 @@ const isMentorRoute = createRouteMatcher([
 ])
 
 export default clerkMiddleware(async (auth, request) => {
+  const { userId } = await auth()
+
+  if (userId && request.nextUrl.pathname === '/') {
+    return Response.redirect(new URL('/journey', request.url))
+  }
+
   // Protect dashboard routes
   if (isDashboardRoute(request)) {
     await auth.protect()
