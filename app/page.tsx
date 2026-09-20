@@ -2,9 +2,14 @@ import Link from 'next/link'
 import { SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import { auth } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
 
 export default async function LandingPage() {
   const { userId } = await auth()
+
+  if (userId) {
+    redirect('/journey')
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -20,8 +25,8 @@ export default async function LandingPage() {
             </Link>
             {userId ? (
               <>
-                <Link href="/dashboard">
-                  <Button variant="ghost">Dashboard</Button>
+                <Link href="/journey">
+                  <Button variant="ghost">Continue journey</Button>
                 </Link>
                 <UserButton
                   appearance={{
