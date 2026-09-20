@@ -183,7 +183,8 @@ export async function POST(req: Request) {
         }),
         
         findMentors: tool({
-          description: 'Find matching mentors based on skills and expertise. [Coming Soon]',
+          description:
+            'Find ranked mentor matches with fit scores based on alumni, location, languages, work alignment, and interests.',
           inputSchema: z.object({
             skills: z.array(z.string()).describe('Skills or expertise areas to match')
           }),

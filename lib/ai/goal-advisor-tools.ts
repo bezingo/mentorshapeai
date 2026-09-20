@@ -394,7 +394,7 @@ export async function searchMemory(
 }
 
 /**
- * Find matching mentors (placeholder for future feature)
+ * Find matching mentors using profile-based scoring (see lib/matching).
  */
 export async function findMentors(
   goalId: string,
@@ -402,11 +402,63 @@ export async function findMentors(
 ): Promise<{
   success: boolean
   message: string
-  mentors?: any[]
+  mentors?: Array<{
+    profileId: string
+    displayName: string | null
+    publicHandle: string | null
+    score: number
+    highlights: string[]
+    profileUrl: string | null
+  }>
 }> {
-  // This will be implemented when mentor matchmaking is available
-  return {
-    success: false,
-    message: 'Mentor matching feature is coming soon! For now, you can browse mentors on the platform or ask your network for recommendations.'
+  try {
+    const supabase = createServiceClient()
+
+    const { data: goal, error: goalError } = await supabase
+      .from('goals')
+      .select('profile_id')
+      .eq('id', goalId)
+      .single()
+
+    if (goalError || !goal?.profile_id) {
+      return { success: false, message: 'Goal not found' }
+    }
+
+    const { getMatchingSuggestions } = await import('@/lib/matching/suggestions')
+    const { suggestions } = await getMatchingSuggestions({
+      menteeProfileId: goal.profile_id,
+      skillsFilter: skills?.length ? skills : undefined,
+      limit: 8,
+    })
+
+    if (suggestions.length === 0) {
+      return {
+        success: true,
+        message:
+          'No mentor matches found yet. Complete your profile and check back as more mentors join.',
+        mentors: [],
+      }
+    }
+
+    const mentors = suggestions.map((s) => ({
+      profileId: s.mentorProfileId,
+      displayName: s.displayName,
+      publicHandle: s.publicHandle,
+      score: s.score,
+      highlights: s.highlights,
+      profileUrl: s.publicHandle ? `/m/${s.publicHandle}` : null,
+    }))
+
+    return {
+      success: true,
+      message: `Found ${mentors.length} mentor match(es) ranked by fit.`,
+      mentors,
+    }
+  } catch (error) {
+    console.error('findMentors error:', error)
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to find mentors',
+    }
   }
 }

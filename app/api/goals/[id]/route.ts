@@ -4,6 +4,7 @@ import { ensureUserAndProfile } from '@/lib/clerk'
 import { createServiceClient } from '@/lib/supabase/service'
 import { z } from 'zod'
 import { createGoalVersion, type ChangeSource } from '@/lib/utils/goal-versioning'
+import { isGoalOrAncestorLocked } from '@/lib/goals/hierarchy-persistence'
 
 const UpdateGoalSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -66,6 +67,13 @@ export async function PATCH(
       return NextResponse.json(
         { error: { code: 'FORBIDDEN', message: 'Not authorized to update this goal' } },
         { status: 403 }
+      )
+    }
+
+    if (await isGoalOrAncestorLocked(serviceSupabase, id)) {
+      return NextResponse.json(
+        { error: { code: 'GOAL_LOCKED', message: 'Goal is locked and cannot be modified' } },
+        { status: 423 }
       )
     }
 

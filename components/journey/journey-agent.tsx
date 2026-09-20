@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { GetAuthToken } from '@heroui/agent'
 import { HeroUIAgent, useAgent } from '@heroui/agent/next'
-import { createJourneyAgentTools } from '@/lib/journey/agent-tools'
+import { createJourneyAgentTools } from '@/lib/agent/journey-agent-tools'
 
 const agentId = process.env.NEXT_PUBLIC_HEROUI_AGENT_ID
 
