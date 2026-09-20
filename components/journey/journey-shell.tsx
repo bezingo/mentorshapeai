@@ -4,12 +4,25 @@ import Link from 'next/link'
 import { UserButton } from '@clerk/nextjs'
 import { Button } from '@heroui/react'
 import { LayoutDashboard, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { ArtifactPanel } from '@/components/journey/artifact-panel'
 import { JourneyAgent } from '@/components/journey/journey-agent'
+import { UpcomingRemindersBanner } from '@/components/journey/upcoming-reminders-banner'
+import { openJourneyArtifact } from '@/lib/journey/artifact-hooks'
 
 export function JourneyShell() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const artifact = searchParams.get('artifact')
+    if (artifact === 'vision-board') {
+      openJourneyArtifact('vision-board')
+    } else if (artifact === 'matching') {
+      openJourneyArtifact('matching')
+    }
+  }, [searchParams])
 
   return (
     <div className="flex h-dvh flex-col bg-background">
@@ -44,6 +57,8 @@ export function JourneyShell() {
           />
         </nav>
       </header>
+
+      <UpcomingRemindersBanner />
 
       <div className="flex min-h-0 flex-1">
         {sidebarOpen && (
