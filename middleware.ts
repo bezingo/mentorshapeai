@@ -8,16 +8,10 @@ const isPublicRoute = createRouteMatcher([
   '/m/(.*)', // Public mentor pages
   '/pricing',
   '/api/webhook/(.*)', // Legacy webhook path
-<<<<<<< HEAD
   '/api/webhooks/(.*)', // Zoom and other provider webhooks
   '/api/mentor/calendar/webhook', // Google Calendar push notifications
   '/api/public/mentor/(.*)', // Public mentor profile API (used on /m/[handle])
   '/api/cron/(.*)', // Cron jobs authenticate via CRON_SECRET in the route handler
-=======
-  '/api/webhooks/(.*)', // Zoom and other webhooks
-  '/api/mentor/calendar/webhook', // Google Calendar push notifications
-  '/api/cron/(.*)', // Cron jobs (Bearer CRON_SECRET in route handlers)
->>>>>>> origin/cursor/zoom-transcript-summary-jobs-1606
 ])
 
 const isDashboardRoute = createRouteMatcher([
