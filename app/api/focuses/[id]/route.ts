@@ -11,6 +11,10 @@ import {
   getFocusStatusTimestamps,
   type FocusStatus,
 } from '@/lib/validations/focus'
+import {
+  notifyFocusCancelled,
+  notifyFocusRescheduled,
+} from '@/lib/notifications/events'
 
 /**
  * GET /api/focuses/[id]
@@ -431,10 +435,29 @@ export async function PATCH(
       )
     }
 
-    // TODO: Future integrations:
-    // 1. Update Zoom meeting if rescheduled
-    // 2. Update Google Calendar events
-    // 3. Send notification emails for reschedule/cancellation
+    // TODO: Update Zoom meeting if rescheduled; update Google Calendar events
+
+    const actorName = profile.display_name || 'Someone'
+
+    if (newStatus === 'cancelled') {
+      notifyFocusCancelled({
+        mentorProfileId: collaboration.mentor_profile_id,
+        menteeProfileId: collaboration.mentee_profile_id,
+        collaborationId: focus.collaboration_id,
+        focusId,
+        cancelledByName: actorName,
+        reason: cancellation_reason,
+      })
+    } else if (scheduled_at && scheduled_at !== focus.scheduled_at) {
+      notifyFocusRescheduled({
+        mentorProfileId: collaboration.mentor_profile_id,
+        menteeProfileId: collaboration.mentee_profile_id,
+        collaborationId: focus.collaboration_id,
+        focusId,
+        scheduledAt: scheduled_at,
+        rescheduledByName: actorName,
+      })
+    }
 
     return NextResponse.json({
       data: {

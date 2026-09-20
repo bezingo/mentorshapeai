@@ -6,6 +6,7 @@ import {
   CreateCollaborationSchema,
   ListCollaborationsQuerySchema,
 } from '@/lib/validations/collaboration'
+import { notifyCollaborationRequested } from '@/lib/notifications/events'
 
 /**
  * GET /api/collaborations
@@ -375,6 +376,17 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+
+    const goalTitle =
+      (newCollab.goal as { title?: string } | null)?.title ?? 'your goal'
+    const menteeName = profile.display_name || 'A mentee'
+
+    notifyCollaborationRequested({
+      mentorProfileId: mentor_profile_id,
+      menteeName,
+      goalTitle,
+      collaborationId: newCollab.id,
+    })
 
     return NextResponse.json(
       {
