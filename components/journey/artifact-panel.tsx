@@ -51,7 +51,7 @@ function HierarchyTree({ node, depth = 0 }: { node: GoalHierarchyNode; depth?: n
   )
 }
 
-export function ArtifactPanel() {
+export function ArtifactPanel({ embedded = false }: { embedded?: boolean }) {
   const [goals, setGoals] = useState<GoalSummary[]>([])
   const [loadingGoals, setLoadingGoals] = useState(true)
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null)
@@ -157,7 +157,13 @@ export function ArtifactPanel() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-y-auto p-4">
+    <div
+      className={
+        embedded
+          ? 'flex h-full min-h-0 flex-col gap-4 overflow-y-auto p-3'
+          : 'flex h-full flex-col gap-4 overflow-y-auto p-4'
+      }
+    >
       <div>
         <h2 className="text-2xl font-semibold">Artifacts</h2>
         <p className="text-small text-default-500">
