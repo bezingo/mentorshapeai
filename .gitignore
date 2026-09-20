@@ -29,6 +29,10 @@ yarn-error.log*
 .env*.local
 .env
 
+# HeroUI Pro CLI credentials (never commit)
+.heroui-pro/
+heroui-pro.credentials.json
+
 # vercel
 .vercel
 
