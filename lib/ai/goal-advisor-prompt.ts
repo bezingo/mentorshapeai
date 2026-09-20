@@ -109,7 +109,7 @@ You have access to:
    - Use when: User references something they shared earlier
    - Requires: Search query
 
-7. **findMentors**: Find matching mentors [Coming Soon]
+7. **findMentors**: Find ranked mentor matches with fit scores
    - Status: Not yet available
    - Will be used for mentor matchmaking
 

@@ -1,6 +1,9 @@
 @import "tailwindcss";
+@import "@heroui/styles";
+/* After `npx heroui-pro login` + install artifacts: @import "@heroui-pro/react/css"; */
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "@heroui/styles";
 
 @custom-variant dark (&:is(.dark *));
 

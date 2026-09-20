@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { FocusBookingModal } from '@/components/focuses/FocusBookingModal'
+import { StripePaymentModal } from '@/components/payments/stripe-payment-modal'
 import { cn } from '@/lib/utils'
 import type { FocusStatus } from '@/lib/validations/focus'
 
@@ -57,6 +58,14 @@ interface Collaboration {
     id: string
     title: string
   }
+  offer_id?: string | null
+  offer?: {
+    id: string
+    type: string
+    title: string
+    price_cents: number | null
+    payment_required: boolean
+  } | null
 }
 
 interface PageProps {
@@ -73,6 +82,12 @@ function getStatusBadge(status: FocusStatus) {
         variant: 'outline' as const,
         icon: <Calendar className="h-3 w-3" />,
         label: 'Scheduled',
+      }
+    case 'pending_payment':
+      return {
+        variant: 'secondary' as const,
+        icon: <Clock className="h-3 w-3" />,
+        label: 'Awaiting payment',
       }
     case 'in_progress':
       return {
@@ -117,6 +132,9 @@ export default function FocusesListPage({ params }: PageProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
+  const [paymentClientSecret, setPaymentClientSecret] = useState<string | null>(null)
+  const [paymentPublishableKey, setPaymentPublishableKey] = useState<string | null>(null)
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
 
   // Fetch collaboration and focuses
   useEffect(() => {
@@ -158,14 +176,33 @@ export default function FocusesListPage({ params }: PageProps) {
   }, [collaborationId])
 
   // Handle booking
+  const refreshFocuses = async () => {
+    const focusResponse = await fetch(
+      `/api/collaborations/${collaborationId}/focuses`
+    )
+    const focusResult = await focusResponse.json()
+    if (focusResponse.ok) {
+      setFocuses(focusResult.data?.focuses || [])
+    }
+  }
+
   const handleBook = async (data: {
     scheduled_at: string
     duration_minutes: number
   }) => {
+    const paidOffer =
+      collaboration?.offer?.type === 'paid_consult' &&
+      !collaboration.offer.payment_required
+        ? collaboration.offer.id
+        : undefined
+
     const response = await fetch(`/api/collaborations/${collaborationId}/focuses`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        ...data,
+        ...(paidOffer ? { mentor_offer_id: paidOffer } : {}),
+      }),
     })
 
     const result = await response.json()
@@ -174,14 +211,19 @@ export default function FocusesListPage({ params }: PageProps) {
       throw new Error(result.error?.message || 'Failed to book focus')
     }
 
-    // Refresh focuses list
-    const focusResponse = await fetch(
-      `/api/collaborations/${collaborationId}/focuses`
-    )
-    const focusResult = await focusResponse.json()
-    if (focusResponse.ok) {
-      setFocuses(focusResult.data?.focuses || [])
+    const payment = result.data?.payment as
+      | { client_secret: string | null; publishable_key: string | null }
+      | null
+      | undefined
+
+    if (payment?.client_secret && payment.publishable_key) {
+      setPaymentClientSecret(payment.client_secret)
+      setPaymentPublishableKey(payment.publishable_key)
+      setIsPaymentModalOpen(true)
+      return
     }
+
+    await refreshFocuses()
   }
 
   // Separate focuses into upcoming and past
@@ -358,6 +400,19 @@ export default function FocusesListPage({ params }: PageProps) {
           onBook={handleBook}
         />
       )}
+
+      <StripePaymentModal
+        open={isPaymentModalOpen}
+        onOpenChange={setIsPaymentModalOpen}
+        clientSecret={paymentClientSecret}
+        publishableKey={paymentPublishableKey}
+        title={
+          collaboration?.offer?.title
+            ? `Pay for ${collaboration.offer.title}`
+            : 'Complete payment'
+        }
+        onSuccess={refreshFocuses}
+      />
     </div>
   )
 }

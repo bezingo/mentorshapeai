@@ -161,6 +161,22 @@ export async function POST(
       )
     }
 
+    // Mirror mentor rating into ratings table for public testimonials/stats
+    if (collaboration && body.rating) {
+      const { error: ratingError } = await supabase.from('ratings').insert({
+        collaboration_id: collaboration.id,
+        mentor_profile_id: collaboration.mentor_profile_id,
+        mentee_profile_id: collaboration.mentee_profile_id,
+        score: body.rating,
+        feedback: body.mentee_reflection || null,
+      })
+
+      if (ratingError) {
+        console.error('Error creating mentor rating:', ratingError)
+        // Don't fail completion; goal_completions.rating is the source of truth
+      }
+    }
+
     // Update goal status to completed
     const { error: updateError } = await supabase
       .from('goals')

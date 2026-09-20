@@ -7,7 +7,11 @@ const isPublicRoute = createRouteMatcher([
   '/g/(.*)', // Public goal pages
   '/m/(.*)', // Public mentor pages
   '/pricing',
-  '/api/webhook/(.*)', // Webhook endpoints (handled separately)
+  '/api/webhook/(.*)', // Legacy webhook path
+  '/api/webhooks/(.*)', // Zoom and other provider webhooks
+  '/api/mentor/calendar/webhook', // Google Calendar push notifications
+  '/api/public/mentor/(.*)', // Public mentor profile API (used on /m/[handle])
+  '/api/cron/(.*)', // Cron jobs authenticate via CRON_SECRET in the route handler
 ])
 
 const isDashboardRoute = createRouteMatcher([
@@ -19,6 +23,12 @@ const isMentorRoute = createRouteMatcher([
 ])
 
 export default clerkMiddleware(async (auth, request) => {
+  const { userId } = await auth()
+
+  if (userId && request.nextUrl.pathname === '/') {
+    return Response.redirect(new URL('/journey', request.url))
+  }
+
   // Protect dashboard routes
   if (isDashboardRoute(request)) {
     await auth.protect()
