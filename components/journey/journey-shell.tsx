@@ -4,13 +4,26 @@ import Link from 'next/link'
 import { UserButton } from '@clerk/nextjs'
 import { Button } from '@heroui/react'
 import { LayoutDashboard, Layers, Sparkles } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Sidebar, Sheet } from '@heroui-pro/react'
 import { ArtifactPanel } from '@/components/journey/artifact-panel'
 import { JourneyAgent } from '@/components/journey/journey-agent'
+import { UpcomingRemindersBanner } from '@/components/journey/upcoming-reminders-banner'
+import { openJourneyArtifact } from '@/lib/journey/artifact-hooks'
 
 export function JourneyShell() {
   const [mobileArtifactsOpen, setMobileArtifactsOpen] = useState(false)
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const artifact = searchParams.get('artifact')
+    if (artifact === 'vision-board') {
+      openJourneyArtifact('vision-board')
+    } else if (artifact === 'matching') {
+      openJourneyArtifact('matching')
+    }
+  }, [searchParams])
 
   return (
     <Sidebar.Provider defaultOpen>
@@ -44,6 +57,8 @@ export function JourneyShell() {
             />
           </nav>
         </header>
+
+        <UpcomingRemindersBanner />
 
         <div className="flex min-h-0 flex-1">
           <Sidebar className="hidden w-[min(400px,40vw)] shrink-0 md:flex" collapsible="offcanvas">

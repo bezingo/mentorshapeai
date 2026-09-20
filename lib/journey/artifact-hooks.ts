@@ -1,22 +1,4 @@
-/**
- * Stubs for the next worker: JointJS vision board + mentor matching.
- */
-
 export type JourneyArtifactKind = 'goals' | 'vision-board' | 'profile' | 'matching'
-
-export function useVisionBoardArtifact() {
-  return {
-    status: 'stub' as const,
-    message: 'Vision board canvas (JointJS) will mount here.',
-  }
-}
-
-export function useMentorMatching() {
-  return {
-    status: 'stub' as const,
-    message: 'Mentor scoring and outreach will be wired in a follow-up PR.',
-  }
-}
 
 export function getArtifactRoute(kind: JourneyArtifactKind): string {
   switch (kind) {
@@ -30,5 +12,19 @@ export function getArtifactRoute(kind: JourneyArtifactKind): string {
       return '/journey?artifact=matching'
     default:
       return '/journey'
+  }
+}
+
+/** Dispatch browser events so the journey artifact sidebar opens the right panel. */
+export function openJourneyArtifact(kind: JourneyArtifactKind, detail?: Record<string, string>) {
+  if (typeof window === 'undefined') return
+  if (kind === 'vision-board') {
+    window.dispatchEvent(
+      new CustomEvent('mentorshape:open-vision-board', {
+        detail,
+      })
+    )
+  } else if (kind === 'matching') {
+    window.dispatchEvent(new CustomEvent('mentorshape:open-matching'))
   }
 }
