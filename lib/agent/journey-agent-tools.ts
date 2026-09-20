@@ -109,7 +109,7 @@ export function createJourneyAgentTools() {
     tool({
       name: 'lockGoal',
       description: 'Lock a goal and its breakdown so the plan view is fixed.',
-      icon: 'lock',
+      icon: 'edit',
       parameters: z.object({
         goalId: z.string().min(1),
         locked: z.boolean().optional(),
@@ -142,7 +142,6 @@ export function createJourneyAgentTools() {
     tool({
       name: 'getYearPlanRemaining',
       description: 'Return remaining months, quarters, and days in the current calendar year.',
-      icon: 'calendar',
       parameters: z.object({}),
       execute: () => {
         const result = getYearPlanRemaining()
@@ -153,7 +152,7 @@ export function createJourneyAgentTools() {
       name: 'getMatchingSuggestions',
       description:
         'Load ranked mentor matches with scores and explainable breakdown for the current mentee.',
-      icon: 'users',
+      icon: 'search',
       parameters: z.object({
         limit: z.number().int().min(1).max(50).optional(),
         skills: z.array(z.string()).optional(),
@@ -174,7 +173,7 @@ export function createJourneyAgentTools() {
       name: 'draftOutreach',
       description:
         'Generate LinkedIn and email outreach drafts (never sent without user confirmation).',
-      icon: 'mail',
+      icon: 'edit',
       parameters: z.object({
         mentorProfileId: z.string().min(1),
         goalId: z.string().optional(),
@@ -198,7 +197,6 @@ export function createJourneyAgentTools() {
     tool({
       name: 'getUpcomingFocuses',
       description: 'List upcoming focus sessions and in-app reminder banner text.',
-      icon: 'calendar',
       parameters: z.object({
         withinDays: z.number().int().min(1).max(90).optional(),
         limit: z.number().int().min(1).max(50).optional(),
@@ -218,7 +216,7 @@ export function createJourneyAgentTools() {
     tool({
       name: 'publishOneLinkProfile',
       description: 'Publish or refresh the mentee public one-link profile at /m/[handle].',
-      icon: 'link',
+      icon: 'navigate',
       parameters: z.object({
         publicHandle: z.string().min(2).max(64).optional(),
       }),

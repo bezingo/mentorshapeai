@@ -10,6 +10,7 @@ import { z } from 'zod'
  * Flow: scheduled → in_progress → completed/cancelled/no_show
  */
 export const FocusStatuses = [
+  'pending_payment',
   'scheduled',
   'in_progress',
   'completed',
@@ -122,6 +123,7 @@ export function isValidFocusStatusTransition(
 
   // Define allowed transitions
   const transitions: Record<FocusStatus, FocusStatus[]> = {
+    pending_payment: ['scheduled', 'cancelled'],
     scheduled: ['in_progress', 'cancelled', 'no_show'],
     in_progress: ['completed', 'cancelled'],
     completed: [], // Terminal state
