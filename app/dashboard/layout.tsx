@@ -3,6 +3,8 @@ import { DashboardSidebar } from '@/components/layout/dashboard-sidebar'
 import { DashboardHeader } from '@/components/layout/dashboard-header'
 import { QueryProvider } from '@/components/providers/query-provider'
 
+export const dynamic = 'force-dynamic'
+
 export default function DashboardLayout({
   children,
 }: {

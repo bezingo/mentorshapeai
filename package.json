@@ -10,7 +10,9 @@
     "type-check": "tsc --noEmit",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "heroui-pro:install": "node scripts/heroui-pro-install.mjs",
+    "postinstall": "node scripts/heroui-pro-postinstall.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.18",

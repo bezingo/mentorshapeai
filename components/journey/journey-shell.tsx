@@ -3,16 +3,17 @@
 import Link from 'next/link'
 import { UserButton } from '@clerk/nextjs'
 import { Button } from '@heroui/react'
-import { LayoutDashboard, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-react'
+import { LayoutDashboard, Layers, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { Sidebar, Sheet } from '@heroui-pro/react'
 import { ArtifactPanel } from '@/components/journey/artifact-panel'
 import { JourneyAgent } from '@/components/journey/journey-agent'
 import { UpcomingRemindersBanner } from '@/components/journey/upcoming-reminders-banner'
 import { openJourneyArtifact } from '@/lib/journey/artifact-hooks'
 
 export function JourneyShell() {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [mobileArtifactsOpen, setMobileArtifactsOpen] = useState(false)
   const searchParams = useSearchParams()
 
   useEffect(() => {
@@ -25,58 +26,75 @@ export function JourneyShell() {
   }, [searchParams])
 
   return (
-    <div className="flex h-dvh flex-col bg-background">
-      <header className="flex h-14 shrink-0 items-center justify-between border-b px-3 md:px-4">
-        <div className="flex items-center gap-2">
-          <Button
-            isIconOnly
-            variant="ghost"
-            aria-label={sidebarOpen ? 'Collapse artifacts' : 'Expand artifacts'}
-            onPress={() => setSidebarOpen((open) => !open)}
-          >
-            {sidebarOpen ? (
-              <PanelLeftClose className="size-4" />
-            ) : (
-              <PanelLeftOpen className="size-4" />
-            )}
-          </Button>
-          <Sparkles className="size-4 text-primary" />
-          <span className="font-semibold">Mentorshape Journey</span>
-        </div>
-        <nav className="flex items-center gap-2">
-          <Link href="/dashboard">
-            <Button variant="ghost" size="sm">
-              <LayoutDashboard className="mr-1 size-4" />
-              Dashboard
+    <Sidebar.Provider defaultOpen>
+      <div className="flex h-dvh flex-col bg-background">
+        <header className="flex h-14 shrink-0 items-center justify-between border-b px-3 md:px-4">
+          <div className="flex items-center gap-2">
+            <Sidebar.Trigger className="hidden md:inline-flex" />
+            <Button
+              isIconOnly
+              variant="ghost"
+              className="md:hidden"
+              aria-label="Open artifacts"
+              onPress={() => setMobileArtifactsOpen(true)}
+            >
+              <Layers className="size-4" />
             </Button>
-          </Link>
-          <UserButton
-            appearance={{
-              elements: { avatarBox: 'h-8 w-8' },
-            }}
-          />
-        </nav>
-      </header>
+            <Sparkles className="size-4 text-primary" />
+            <span className="font-semibold">Mentorshape Journey</span>
+          </div>
+          <nav className="flex items-center gap-2">
+            <Link href="/dashboard">
+              <Button variant="ghost" size="sm">
+                <LayoutDashboard className="mr-1 size-4" />
+                Dashboard
+              </Button>
+            </Link>
+            <UserButton
+              appearance={{
+                elements: { avatarBox: 'h-8 w-8' },
+              }}
+            />
+          </nav>
+        </header>
 
-      <UpcomingRemindersBanner />
+        <UpcomingRemindersBanner />
 
-      <div className="flex min-h-0 flex-1">
-        {sidebarOpen && (
-          <aside className="hidden w-[400px] shrink-0 border-r md:flex md:flex-col overflow-hidden">
-            <ArtifactPanel />
-          </aside>
-        )}
+        <div className="flex min-h-0 flex-1">
+          <Sidebar className="hidden w-[min(400px,40vw)] shrink-0 md:flex" collapsible="offcanvas">
+            <Sidebar.Header>
+              <Sidebar.MenuLabel className="text-base font-semibold">Artifacts</Sidebar.MenuLabel>
+            </Sidebar.Header>
+            <Sidebar.Content>
+              <ArtifactPanel embedded />
+            </Sidebar.Content>
+            <Sidebar.Rail />
+          </Sidebar>
 
-        <main className="relative min-w-0 flex-1">
-          <JourneyAgent />
-        </main>
-      </div>
-
-      {sidebarOpen && (
-        <div className="border-t md:hidden max-h-[45vh] overflow-auto">
-          <ArtifactPanel />
+          <main className="relative min-w-0 flex-1">
+            <JourneyAgent />
+          </main>
         </div>
-      )}
-    </div>
+
+        <Sheet
+          isOpen={mobileArtifactsOpen}
+          onOpenChange={setMobileArtifactsOpen}
+          placement="bottom"
+        >
+          <Sheet.Content className="max-h-[85vh]">
+            <Sheet.Dialog>
+              <Sheet.Handle />
+              <Sheet.Header>
+                <Sheet.Heading>Artifacts</Sheet.Heading>
+                <Sheet.CloseTrigger />
+              </Sheet.Header>
+              <Sheet.Body className="px-0 pb-4">
+                <ArtifactPanel embedded />
+              </Sheet.Body>
+            </Sheet.Dialog>
+          </Sheet.Content>
+        </Sheet>
+      </div>
+    </Sidebar.Provider>
   )
 }
