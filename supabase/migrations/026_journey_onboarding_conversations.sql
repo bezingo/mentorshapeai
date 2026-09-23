@@ -28,25 +28,25 @@ alter table public.journey_conversation_messages enable row level security;
 
 create policy "Users can view own journey conversations"
   on public.journey_conversations for select
-  using (profile_id = auth.uid());
+  using (profile_id = auth.get_profile_id());
 
 create policy "Users can create own journey conversations"
   on public.journey_conversations for insert
-  with check (profile_id = auth.uid());
+  with check (profile_id = auth.get_profile_id());
 
 create policy "Users can update own journey conversations"
   on public.journey_conversations for update
-  using (profile_id = auth.uid());
+  using (profile_id = auth.get_profile_id());
 
 create policy "Users can delete own journey conversations"
   on public.journey_conversations for delete
-  using (profile_id = auth.uid());
+  using (profile_id = auth.get_profile_id());
 
 create policy "Users can view own journey conversation messages"
   on public.journey_conversation_messages for select
   using (
     conversation_id in (
-      select id from public.journey_conversations where profile_id = auth.uid()
+      select id from public.journey_conversations where profile_id = auth.get_profile_id()
     )
   );
 
@@ -54,7 +54,7 @@ create policy "Users can create messages in own journey conversations"
   on public.journey_conversation_messages for insert
   with check (
     conversation_id in (
-      select id from public.journey_conversations where profile_id = auth.uid()
+      select id from public.journey_conversations where profile_id = auth.get_profile_id()
     )
   );
 
@@ -62,7 +62,7 @@ create policy "Users can update messages in own journey conversations"
   on public.journey_conversation_messages for update
   using (
     conversation_id in (
-      select id from public.journey_conversations where profile_id = auth.uid()
+      select id from public.journey_conversations where profile_id = auth.get_profile_id()
     )
   );
 
@@ -70,7 +70,7 @@ create policy "Users can delete messages in own journey conversations"
   on public.journey_conversation_messages for delete
   using (
     conversation_id in (
-      select id from public.journey_conversations where profile_id = auth.uid()
+      select id from public.journey_conversations where profile_id = auth.get_profile_id()
     )
   );
 
