@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { motion, useReducedMotion } from 'motion/react'
-import { RiCheckboxCircleFill, RiSparklingLine } from '@remixicon/react'
+import { RiCheckboxCircleFill, RiErrorWarningFill, RiSparklingLine } from '@remixicon/react'
 import { AgentMessage } from '@/components/application/agent-chat/agent-chat-message'
 import { AgentComposer } from '@/components/application/agent-chat/agent-composer'
 import { AgentThinking } from '@/components/application/agent-thinking/agent-thinking'
@@ -82,6 +82,7 @@ export function GoalPlannerChat() {
   const [showShapingModal, setShowShapingModal] = useState(false)
   const [createdGoalId, setCreatedGoalId] = useState<string | null>(null)
   const [shapedGoalData, setShapedGoalData] = useState<GoalShapedData | null>(null)
+  const [chatError, setChatError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll to bottom when new messages arrive
@@ -106,6 +107,7 @@ export function GoalPlannerChat() {
       return res.json()
     },
     onSuccess: (data) => {
+      setChatError(null)
       setSessionId(data.data.session_id)
       setMessages([
         {
@@ -116,6 +118,9 @@ export function GoalPlannerChat() {
         },
       ])
       setState(data.data.state)
+    },
+    onError: (error: Error) => {
+      setChatError(error.message)
     },
   })
 
@@ -133,7 +138,9 @@ export function GoalPlannerChat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           session_id: sessionId,
-          message: message,
+          message,
+          state,
+          messages: messages.map((m) => ({ role: m.role, content: m.content })),
         }),
       })
 
@@ -145,6 +152,7 @@ export function GoalPlannerChat() {
       return res.json()
     },
     onSuccess: (data: { data: ChatResponse }) => {
+      setChatError(null)
       const response = data.data
 
       // Add assistant response (the user message was added optimistically)
@@ -163,7 +171,7 @@ export function GoalPlannerChat() {
       setIsComplete(response.is_complete)
     },
     onError: (error: Error) => {
-      alert(`Error: ${error.message}`)
+      setChatError(error.message)
     },
   })
 
@@ -177,7 +185,8 @@ export function GoalPlannerChat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           session_id: sessionId,
-          status: status,
+          status,
+          state,
         }),
       })
 
@@ -189,6 +198,7 @@ export function GoalPlannerChat() {
       return res.json()
     },
     onSuccess: async (data) => {
+      setChatError(null)
       const goalId = data.data.goal.id
       setCreatedGoalId(goalId)
 
@@ -218,7 +228,7 @@ export function GoalPlannerChat() {
       }
     },
     onError: (error: Error) => {
-      alert(`Error creating goal: ${error.message}`)
+      setChatError(error.message)
     },
   })
 
@@ -237,6 +247,7 @@ export function GoalPlannerChat() {
       },
     ])
     setInput('')
+    setChatError(null)
     sendMessageMutation.mutate(message)
   }
 
@@ -248,6 +259,27 @@ export function GoalPlannerChat() {
     return (
       <div className="flex items-center justify-center rounded-3xl border border-border-button-default bg-background-primary-default py-16 shadow-xs">
         <AgentThinking variant="wave" label="Starting your planning session" />
+      </div>
+    )
+  }
+
+  if (startSessionMutation.isError && !sessionId) {
+    return (
+      <div className="flex flex-col items-center justify-center rounded-3xl border border-border-button-default bg-background-primary-default px-6 py-16 shadow-xs">
+        <div className="flex max-w-md gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-body-regular text-destructive">
+          <RiErrorWarningFill className="size-5 shrink-0" aria-hidden />
+          <span>{chatError || 'Failed to start goal planning. Please refresh and try again.'}</span>
+        </div>
+        <Button
+          className="mt-4"
+          variant="secondary"
+          onClick={() => {
+            setChatError(null)
+            startSessionMutation.mutate()
+          }}
+        >
+          Try again
+        </Button>
       </div>
     )
   }
@@ -285,6 +317,13 @@ export function GoalPlannerChat() {
               )}
               <div ref={messagesEndRef} />
             </div>
+
+            {chatError && (
+              <div className="mb-3 flex gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-3 py-2 text-body-regular text-destructive">
+                <RiErrorWarningFill className="size-5 shrink-0" aria-hidden />
+                <span>{chatError}</span>
+              </div>
+            )}
 
             {/* Composer */}
             <AgentComposer
@@ -376,6 +415,12 @@ export function GoalPlannerChat() {
                 transition={FIELD_TRANSITION}
                 className="space-y-3 border-t border-separator-border pt-4"
               >
+                {chatError && createGoalMutation.isError && (
+                  <div className="flex gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-3 py-2 text-body-regular text-destructive">
+                    <RiErrorWarningFill className="size-5 shrink-0" aria-hidden />
+                    <span>{chatError}</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2">
                   <RiCheckboxCircleFill className="size-4 text-status-lime-text" aria-hidden />
                   <span className="text-body-medium text-text-primary">Ready to create goal</span>

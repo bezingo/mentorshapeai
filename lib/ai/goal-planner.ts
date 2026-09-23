@@ -111,13 +111,36 @@ Guidelines:
 - List missing fields that would be helpful but aren't required
 - Your "message" should be conversational and friendly, acknowledging what they shared and asking follow-ups naturally`
 
+export const GOAL_PLANNER_MAX_CLIENT_MESSAGES = 40
+export const GOAL_PLANNER_MAX_CLIENT_MESSAGE_CHARS = 4000
+
+export const GoalPlannerClientMessageSchema = z.object({
+  role: z.enum(['user', 'assistant']),
+  content: z.string().max(GOAL_PLANNER_MAX_CLIENT_MESSAGE_CHARS),
+})
+
+export type GoalPlannerClientMessage = z.infer<typeof GoalPlannerClientMessageSchema>
+
 /**
- * Conversation history storage (in-memory for now)
+ * Conversation history passed from the client on each request (serverless-safe).
  */
 export interface ConversationHistory {
   messages: BaseMessage[]
   state: GoalPlanningState
   created_at: Date
+}
+
+export function conversationHistoryFromClient(
+  messages: GoalPlannerClientMessage[],
+  state: GoalPlanningState
+): ConversationHistory {
+  return {
+    messages: messages.map((m) =>
+      m.role === 'user' ? new HumanMessage(m.content) : new AIMessage(m.content)
+    ),
+    state,
+    created_at: new Date(),
+  }
 }
 
 /**
