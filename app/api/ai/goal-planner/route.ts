@@ -5,45 +5,37 @@ import {
   initializeGoalPlanning,
   processGoalPlanningMessage,
   planningStateToGoalInput,
-  ConversationHistory,
+  GoalPlanningStateSchema,
+  GoalPlannerClientMessageSchema,
+  GOAL_PLANNER_MAX_CLIENT_MESSAGES,
+  conversationHistoryFromClient,
 } from '@/lib/ai/goal-planner'
 import { createServiceClient } from '@/lib/supabase/service'
 import { generateUniqueSlug } from '@/lib/utils/slug'
 import { z } from 'zod'
 import { randomUUID } from 'crypto'
 
-// In-memory session storage (use Redis in production)
-const sessions = new Map<string, ConversationHistory>()
-
-// Clean up old sessions (older than 1 hour)
-setInterval(() => {
-  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
-  for (const [sessionId, session] of sessions.entries()) {
-    if (session.created_at < oneHourAgo) {
-      sessions.delete(sessionId)
-    }
-  }
-}, 15 * 60 * 1000) // Run cleanup every 15 minutes
-
-// Request schemas
 const StartSessionSchema = z.object({})
 
 const ChatMessageSchema = z.object({
   session_id: z.string().uuid(),
   message: z.string().min(1).max(2000),
+  state: GoalPlanningStateSchema,
+  messages: z.array(GoalPlannerClientMessageSchema).max(GOAL_PLANNER_MAX_CLIENT_MESSAGES),
 })
 
 const CompleteGoalSchema = z.object({
   session_id: z.string().uuid(),
   status: z.enum(['draft', 'active']).default('draft'),
+  state: GoalPlanningStateSchema,
 })
 
 /**
  * POST /api/ai/goal-planner?action=start
  * PUT /api/ai/goal-planner?action=chat
  * PATCH /api/ai/goal-planner?action=complete
- * 
- * Handle goal planning conversation sessions
+ *
+ * Stateless goal planning: the client sends planning state (+ message history for chat).
  */
 export async function POST(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -87,9 +79,6 @@ export async function PATCH(request: NextRequest) {
   )
 }
 
-/**
- * Initialize a new goal planning conversation session
- */
 async function handleStartSession(request: NextRequest) {
   try {
     await requireMentee()
@@ -103,15 +92,13 @@ async function handleStartSession(request: NextRequest) {
     }
 
     const body = await request.json().catch(() => ({}))
-    const validated = StartSessionSchema.parse(body)
+    StartSessionSchema.parse(body)
 
-    // Create new session
     const sessionId = randomUUID()
     const session = initializeGoalPlanning()
-    sessions.set(sessionId, session)
 
-    // Initial greeting message
-    const initialMessage = "Hi! I'm here to help you plan your goal. What would you like to achieve?"
+    const initialMessage =
+      "Hi! I'm here to help you plan your goal. What would you like to achieve?"
 
     return NextResponse.json({
       data: {
@@ -142,9 +129,6 @@ async function handleStartSession(request: NextRequest) {
   }
 }
 
-/**
- * Send a message in the goal planning conversation
- */
 async function handleChatMessage(request: NextRequest) {
   try {
     await requireMentee()
@@ -158,21 +142,13 @@ async function handleChatMessage(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { session_id, message } = ChatMessageSchema.parse(body)
+    const { message, state, messages } = ChatMessageSchema.parse(body)
 
-    // Get session
-    const session = sessions.get(session_id)
-    if (!session) {
-      return NextResponse.json(
-        { error: { code: 'SESSION_NOT_FOUND', message: 'Session not found or expired' } },
-        { status: 404 }
-      )
-    }
+    const history = conversationHistoryFromClient(messages, state)
 
-    // Process message
     let response
     try {
-      response = await processGoalPlanningMessage(message, session)
+      response = await processGoalPlanningMessage(message, history)
     } catch (error: any) {
       if (error.message?.includes('timeout')) {
         return NextResponse.json(
@@ -239,9 +215,6 @@ async function handleChatMessage(request: NextRequest) {
   }
 }
 
-/**
- * Complete the goal planning and create the goal
- */
 async function handleCompleteGoal(request: NextRequest) {
   try {
     await requireMentee()
@@ -255,37 +228,25 @@ async function handleCompleteGoal(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { session_id, status } = CompleteGoalSchema.parse(body)
+    const { status, state } = CompleteGoalSchema.parse(body)
 
-    // Get session
-    const session = sessions.get(session_id)
-    if (!session) {
-      return NextResponse.json(
-        { error: { code: 'SESSION_NOT_FOUND', message: 'Session not found or expired' } },
-        { status: 404 }
-      )
-    }
-
-    // Validate that we have enough information
-    if (!session.state.conversation_complete) {
+    if (!state.conversation_complete) {
       return NextResponse.json(
         {
           error: {
             code: 'INCOMPLETE_CONVERSATION',
             message: 'Not enough information collected. Please continue the conversation.',
-            missing_fields: session.state.missing_fields,
+            missing_fields: state.missing_fields,
           },
         },
         { status: 400 }
       )
     }
 
-    // Convert planning state to goal input
-    const goalInput = planningStateToGoalInput(session.state)
+    const goalInput = planningStateToGoalInput(state)
 
     const serviceSupabase = createServiceClient()
 
-    // Generate public_slug if status is active
     let publicSlug: string | null = null
     if (status === 'active') {
       publicSlug = await generateUniqueSlug(goalInput.title, async (slug) => {
@@ -298,7 +259,6 @@ async function handleCompleteGoal(request: NextRequest) {
       })
     }
 
-    // Create goal
     const { data: goal, error: goalError } = await serviceSupabase
       .from('goals')
       .insert({
@@ -309,8 +269,8 @@ async function handleCompleteGoal(request: NextRequest) {
         duration_days: goalInput.duration_days,
         success_definition: goalInput.success_definition,
         current_challenges: goalInput.current_challenges,
-        motivation: session.state.motivation,
-        suggested_approach: session.state.suggested_approach,
+        motivation: state.motivation,
+        suggested_approach: state.suggested_approach,
         status: status,
         public_slug: publicSlug,
       })
@@ -325,13 +285,10 @@ async function handleCompleteGoal(request: NextRequest) {
       )
     }
 
-    // Clean up session
-    sessions.delete(session_id)
-
     return NextResponse.json({
       data: {
         goal,
-        should_shape: true, // Indicate that Goal Shaper should be triggered
+        should_shape: true,
       },
     })
   } catch (error: any) {
@@ -355,4 +312,3 @@ async function handleCompleteGoal(request: NextRequest) {
     )
   }
 }
-

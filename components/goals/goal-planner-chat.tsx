@@ -85,6 +85,7 @@ export function GoalPlannerChat() {
       return res.json()
     },
     onSuccess: (data) => {
+      setChatError(null)
       setSessionId(data.data.session_id)
       setMessages([
         {
@@ -95,6 +96,9 @@ export function GoalPlannerChat() {
         },
       ])
       setState(data.data.state)
+    },
+    onError: (error: Error) => {
+      setChatError(error.message)
     },
   })
 
@@ -112,7 +116,9 @@ export function GoalPlannerChat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           session_id: sessionId,
-          message: message,
+          message,
+          state,
+          messages: messages.map((m) => ({ role: m.role, content: m.content })),
         }),
       })
 
@@ -169,7 +175,8 @@ export function GoalPlannerChat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           session_id: sessionId,
-          status: status,
+          status,
+          state,
         }),
       })
 
@@ -181,6 +188,7 @@ export function GoalPlannerChat() {
       return res.json()
     },
     onSuccess: async (data) => {
+      setChatError(null)
       const goalId = data.data.goal.id
       setCreatedGoalId(goalId)
 
@@ -210,7 +218,7 @@ export function GoalPlannerChat() {
       }
     },
     onError: (error: Error) => {
-      alert(`Error creating goal: ${error.message}`)
+      setChatError(error.message)
     },
   })
 
@@ -235,6 +243,29 @@ export function GoalPlannerChat() {
       <Card>
         <CardContent className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (startSessionMutation.isError && !sessionId) {
+    return (
+      <Card>
+        <CardContent className="py-8">
+          <div className="flex gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{chatError || 'Failed to start goal planning. Please refresh and try again.'}</span>
+          </div>
+          <Button
+            className="mt-4"
+            variant="outline"
+            onClick={() => {
+              setChatError(null)
+              startSessionMutation.mutate()
+            }}
+          >
+            Try again
+          </Button>
         </CardContent>
       </Card>
     )
@@ -422,6 +453,12 @@ export function GoalPlannerChat() {
             {/* Completion Status */}
             {isComplete && (
               <div className="pt-4 border-t space-y-2">
+                {chatError && createGoalMutation.isError && (
+                  <div className="flex gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                    <span>{chatError}</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2 text-sm text-green-600">
                   <CheckCircle2 className="h-4 w-4" />
                   <span>Ready to create goal</span>
