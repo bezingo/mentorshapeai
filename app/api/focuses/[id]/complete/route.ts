@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from 'next/server'
 import { requireAuth, ensureUserAndProfile } from '@/lib/clerk'
 import { createServiceClient } from '@/lib/supabase/service'
 import { isValidFocusStatusTransition, type FocusStatus } from '@/lib/validations/focus'
+import { notifyFocusCompleted } from '@/lib/notifications/events'
 
 /**
  * POST /api/focuses/[id]/complete
@@ -168,10 +169,21 @@ export async function POST(
       )
     }
 
-    // TODO: Future integrations:
-    // 1. Trigger AI summary generation from recording/transcript
-    // 2. Send completion notification emails
-    // 3. Update progress tracking
+    // TODO: Trigger AI summary generation from recording/transcript; update progress tracking
+
+    const completedCollaboration = Array.isArray(completedFocus.collaboration)
+      ? completedFocus.collaboration[0]
+      : completedFocus.collaboration
+
+    if (completedCollaboration) {
+      notifyFocusCompleted({
+        mentorProfileId: completedCollaboration.mentor_profile_id,
+        menteeProfileId: completedCollaboration.mentee_profile_id,
+        collaborationId: completedCollaboration.id,
+        focusId,
+        completedByName: profile.display_name || 'Someone',
+      })
+    }
 
     return NextResponse.json({
       data: {

@@ -9,6 +9,7 @@ import {
   doFocusTimesOverlap,
 } from '@/lib/validations/focus'
 import { getZoomClient, createZoomMeeting } from '@/lib/zoom/client'
+import { notifyFocusScheduled } from '@/lib/notifications/events'
 import { isStripeConfigured } from '@/lib/stripe/config'
 import { getMentorConnectStatus } from '@/lib/stripe/connect'
 import { createOfferPaymentIntent } from '@/lib/stripe/payment-intents'
@@ -632,9 +633,16 @@ export async function POST(
       }
     }
 
-    // TODO: Future integrations:
-    // 1. Create Google Calendar events for both mentor and mentee
-    // 2. Send notification emails
+    // TODO: Create Google Calendar events for both mentor and mentee
+
+    notifyFocusScheduled({
+      mentorProfileId: collaboration.mentor_profile_id,
+      menteeProfileId: collaboration.mentee_profile_id,
+      collaborationId,
+      focusId: newFocus.id,
+      scheduledAt: scheduled_at,
+      bookedByName: profile.display_name || 'Someone',
+    })
 
     return NextResponse.json(
       {

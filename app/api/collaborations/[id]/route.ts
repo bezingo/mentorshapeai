@@ -9,6 +9,11 @@ import {
   getStatusTimestamps,
   type CollaborationStatus,
 } from '@/lib/validations/collaboration'
+import {
+  notifyCollaborationAccepted,
+  notifyCollaborationCancelled,
+  notifyCollaborationDeclined,
+} from '@/lib/notifications/events'
 
 /**
  * GET /api/collaborations/[id]
@@ -298,6 +303,35 @@ export async function PATCH(
       )
     }
 
+    const goalTitle =
+      (updatedCollab.goal as { title?: string } | null)?.title ?? 'your goal'
+    const mentorName =
+      (updatedCollab.mentor_profile as { display_name?: string } | null)?.display_name ||
+      'Your mentor'
+    if (newStatus === 'accepted') {
+      notifyCollaborationAccepted({
+        menteeProfileId: updatedCollab.mentee_profile_id,
+        mentorName,
+        goalTitle,
+        collaborationId: updatedCollab.id,
+      })
+    } else if (newStatus === 'declined') {
+      notifyCollaborationDeclined({
+        menteeProfileId: updatedCollab.mentee_profile_id,
+        mentorName,
+        goalTitle,
+        collaborationId: updatedCollab.id,
+      })
+    } else if (newStatus === 'cancelled') {
+      notifyCollaborationCancelled({
+        mentorProfileId: updatedCollab.mentor_profile_id,
+        menteeProfileId: updatedCollab.mentee_profile_id,
+        cancelledByProfileId: profile.id,
+        goalTitle,
+        collaborationId: updatedCollab.id,
+      })
+    }
+
     return NextResponse.json({
       data: {
         ...updatedCollab,
@@ -457,6 +491,18 @@ export async function DELETE(
         { status: 500 }
       )
     }
+
+    const cancelledGoalTitle =
+      (cancelledCollab.goal as { title?: string } | null)?.title ?? 'your goal'
+
+    notifyCollaborationCancelled({
+      mentorProfileId: cancelledCollab.mentor_profile_id,
+      menteeProfileId: cancelledCollab.mentee_profile_id,
+      cancelledByProfileId: profile.id,
+      goalTitle: cancelledGoalTitle,
+      collaborationId: cancelledCollab.id,
+      reason: cancellationReason,
+    })
 
     return NextResponse.json({
       data: {
