@@ -2,6 +2,8 @@ import { NextResponse, NextRequest } from 'next/server'
 import { ensureUserAndProfile, requireAuth } from '@/lib/clerk'
 import { createServiceClient } from '@/lib/supabase/service'
 import { z } from 'zod'
+import { getPaymentRequiredForMentor } from '@/lib/payments/offers'
+import { syncMentorOfferStripeCatalog } from '@/lib/payments/sync-offer-stripe'
 
 /**
  * Valid mentor offer types
@@ -117,8 +119,10 @@ export async function PUT(
 
     if (updateData.type !== undefined) {
       updateFields.type = updateData.type
-      // Update payment_required based on type change
-      updateFields.payment_required = updateData.type === 'paid_consult'
+      updateFields.payment_required = await getPaymentRequiredForMentor(
+        profile.id,
+        updateData.type
+      )
     }
     if (updateData.title !== undefined) updateFields.title = updateData.title
     if (updateData.description !== undefined) updateFields.description = updateData.description
@@ -149,7 +153,25 @@ export async function PUT(
       )
     }
 
-    return NextResponse.json({ data: updatedOffer })
+    const stripeSync = await syncMentorOfferStripeCatalog(profile.id, {
+      id: updatedOffer.id,
+      type: updatedOffer.type,
+      title: updatedOffer.title,
+      description: updatedOffer.description,
+      price_cents: updatedOffer.price_cents,
+      currency: updatedOffer.currency,
+      stripe_product_id: updatedOffer.stripe_product_id,
+      stripe_price_id: updatedOffer.stripe_price_id,
+    })
+
+    return NextResponse.json({
+      data: {
+        ...updatedOffer,
+        payment_required: stripeSync.payment_required,
+        stripe_product_id: stripeSync.stripe_product_id ?? updatedOffer.stripe_product_id,
+        stripe_price_id: stripeSync.stripe_price_id ?? updatedOffer.stripe_price_id,
+      },
+    })
   } catch (error: unknown) {
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json(

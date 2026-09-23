@@ -26,8 +26,7 @@ export default function MentorOffersPage() {
       <OffersList
         fetchOnMount={true}
         onSetupPayments={() => {
-          // TODO: Navigate to payment setup when implemented
-          alert('Payment setup will be available in a future update.')
+          window.location.href = '/dashboard/profile/payments'
         }}
       />
     </div>
