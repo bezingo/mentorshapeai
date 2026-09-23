@@ -3,7 +3,7 @@ import {
   JOURNEY_AGENT_TOOL_NAMES,
   createJourneyAgentTools,
 } from '@/lib/agent/journey-agent-tools'
-import { MENTORSHAPE_ONBOARDING_SYSTEM_PROMPT } from '@/lib/journey/onboarding-system-prompt'
+import { MENTORSHAPE_ONBOARDING_SYSTEM_PROMPT, buildOnboardingSystemPrompt } from '@/lib/journey/onboarding-system-prompt'
 import { getArtifactRoute } from '@/lib/journey/artifact-hooks'
 
 describe('journey agent tools', () => {
@@ -27,5 +27,11 @@ describe('onboarding system prompt', () => {
     expect(MENTORSHAPE_ONBOARDING_SYSTEM_PROMPT).toContain('openVisionBoard')
     expect(MENTORSHAPE_ONBOARDING_SYSTEM_PROMPT).toContain('draftOutreach')
     expect(MENTORSHAPE_ONBOARDING_SYSTEM_PROMPT).toContain('getUpcomingFocuses')
+  })
+
+  it('injects current date context for built-in chat', () => {
+    const prompt = buildOnboardingSystemPrompt(new Date('2026-09-23T12:00:00.000Z'))
+    expect(prompt).toContain('2026')
+    expect(prompt).toContain('Current date context')
   })
 })
