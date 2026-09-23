@@ -89,6 +89,15 @@ export function ArtifactPanel({ embedded = false }: { embedded?: boolean }) {
     loadVisionBoards()
   }, [loadGoals, loadVisionBoards])
 
+  useEffect(() => {
+    const refresh = () => {
+      void loadGoals()
+      void loadVisionBoards()
+    }
+    window.addEventListener('mentorshape:refresh-artifacts', refresh)
+    return () => window.removeEventListener('mentorshape:refresh-artifacts', refresh)
+  }, [loadGoals, loadVisionBoards])
+
   const loadMatching = useCallback(async () => {
     setMatchingLoading(true)
     setMatchingError(null)

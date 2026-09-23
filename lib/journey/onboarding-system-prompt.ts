@@ -1,3 +1,5 @@
+import { getRemainingYearPlan } from '@/lib/goals/hierarchy'
+
 /**
  * Paste into HeroUI Agents dashboard (Settings → System prompt) or configure via Agents MCP.
  * @see https://agent-mcp.heroui.pro/mcp
@@ -38,3 +40,20 @@ export const MENTORSHAPE_ONBOARDING_SYSTEM_PROMPT = `You are the Mentorshape onb
 
 ## Tone
 Supportive coach, not a form. Reflect their words back and suggest concrete drafts they can accept or edit.`
+
+/** System prompt for built-in /journey chat (OpenAI via Vercel AI SDK). */
+export function buildOnboardingSystemPrompt(now: Date = new Date()): string {
+  const plan = getRemainingYearPlan(now)
+  const dateLabel = now.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'UTC',
+  })
+
+  return `${MENTORSHAPE_ONBOARDING_SYSTEM_PROMPT}
+
+## Current date context (server-injected)
+Today is ${dateLabel} (UTC). Calendar year ${plan.plan_year}: ${plan.remaining_days_in_year} days remain in the year, ${plan.remaining_months.length} month(s) and ${plan.remaining_quarters.length} quarter(s) left to plan. Use **getYearPlanRemaining** when you need exact keys for hierarchy nodes.`
+}

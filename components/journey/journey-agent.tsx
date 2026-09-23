@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import type { GetAuthToken } from '@heroui/agent'
 import { HeroUIAgent, useAgent } from '@heroui/agent/next'
 import { createJourneyAgentTools } from '@/lib/agent/journey-agent-tools'
+import { JourneyChat } from '@/components/journey/journey-chat'
 
 const agentId = process.env.NEXT_PUBLIC_HEROUI_AGENT_ID
 
@@ -48,26 +49,7 @@ export function JourneyAgent() {
   )
 
   if (!agentId) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
-        <p className="text-lg font-medium">HeroUI Agent is not configured</p>
-        <p className="max-w-md text-sm text-muted-foreground">
-          Set <code className="text-xs">HEROUI_AGENT_API_KEY</code>,{' '}
-          <code className="text-xs">HEROUI_AGENT_ID</code>, and{' '}
-          <code className="text-xs">NEXT_PUBLIC_HEROUI_AGENT_ID</code> in your environment, then
-          create the agent via the{' '}
-          <a
-            className="underline"
-            href="https://heroui.pro/agents"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Agents dashboard
-          </a>
-          .
-        </p>
-      </div>
-    )
+    return <JourneyChat onGoalSaved={onGoalSaved} />
   }
 
   return (
