@@ -76,6 +76,9 @@ export function JourneyAgent() {
         agentId={agentId}
         getAuthToken={getAuthToken}
         tools={tools}
+        onError={(err) => {
+          console.error('[Journey Agent]', err)
+        }}
         context={{
           router,
           onGoalSaved,

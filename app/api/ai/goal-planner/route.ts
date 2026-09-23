@@ -188,21 +188,24 @@ async function handleChatMessage(request: NextRequest) {
         )
       }
 
+      const rawMessage = error.message || ''
+      const missingOpenAi =
+        rawMessage.includes('OPENAI_API_KEY') ||
+        rawMessage.includes('Token Provider not found')
+
       console.error('Error processing goal planning message:', error)
-      console.error('Error details:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
-      })
+
       return NextResponse.json(
-        { 
-          error: { 
-            code: 'AI_ERROR', 
-            message: error.message || 'Failed to process message. Please try again.',
-            details: process.env.NODE_ENV === 'development' ? String(error) : undefined
-          } 
+        {
+          error: {
+            code: missingOpenAi ? 'AI_NOT_CONFIGURED' : 'AI_ERROR',
+            message: missingOpenAi
+              ? 'AI chat is not configured on the server. Add OPENAI_API_KEY in Vercel project settings, then redeploy.'
+              : 'Failed to process message. Please try again.',
+            details: process.env.NODE_ENV === 'development' ? String(error) : undefined,
+          },
         },
-        { status: 500 }
+        { status: missingOpenAi ? 503 : 500 }
       )
     }
 

@@ -145,17 +145,16 @@ export async function processGoalPlanningMessage(
   userMessage: string,
   history: ConversationHistory
 ): Promise<GoalPlannerResponse> {
+  if (!process.env.OPENAI_API_KEY?.trim()) {
+    throw new Error('OPENAI_API_KEY environment variable is not set')
+  }
+
   const model = new ChatOpenAI({
     modelName: 'gpt-4o-mini',
     temperature: 0.7, // Slightly higher for more natural conversation
     openAIApiKey: process.env.OPENAI_API_KEY,
     timeout: 30000, // 30 second timeout
   })
-
-  // Check if OpenAI API key is set
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY environment variable is not set')
-  }
 
   // Create a prompt that includes conversation history
   const prompt = ChatPromptTemplate.fromMessages([

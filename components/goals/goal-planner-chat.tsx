@@ -60,6 +60,7 @@ export function GoalPlannerChat() {
   const [showShapingModal, setShowShapingModal] = useState(false)
   const [createdGoalId, setCreatedGoalId] = useState<string | null>(null)
   const [shapedGoalData, setShapedGoalData] = useState<any>(null)
+  const [chatError, setChatError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll to bottom when new messages arrive
@@ -123,6 +124,7 @@ export function GoalPlannerChat() {
       return res.json()
     },
     onSuccess: (data: { data: ChatResponse }) => {
+      setChatError(null)
       const response = data.data
       
       // Add user message
@@ -153,7 +155,7 @@ export function GoalPlannerChat() {
       setInput('')
     },
     onError: (error: Error) => {
-      alert(`Error: ${error.message}`)
+      setChatError(error.message)
     },
   })
 
@@ -280,6 +282,13 @@ export function GoalPlannerChat() {
               )}
               <div ref={messagesEndRef} />
             </div>
+
+            {chatError && (
+              <div className="mb-3 flex gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>{chatError}</span>
+              </div>
+            )}
 
             {/* Input */}
             <div className="flex gap-2">
