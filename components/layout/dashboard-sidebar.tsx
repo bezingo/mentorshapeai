@@ -18,13 +18,14 @@ import {
   RiUserStarLine,
 } from '@remixicon/react'
 import { cx } from '@/utils/cx'
+import { useI18n } from '@/lib/i18n'
 
 type NavRole = 'mentor' | 'mentee' | 'counselor'
 
 type IconComponent = React.ComponentType<{ className?: string }>
 
 interface NavItem {
-  title: string
+  titleKey: keyof typeof import('@/lib/i18n/locales/en').en.nav
   href: string
   icon: IconComponent
   roles?: NavRole[]
@@ -32,18 +33,17 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { title: 'Dashboard', href: '/dashboard', icon: RiDashboardLine },
-  { title: 'My Goals', href: '/dashboard/mentee/goals', icon: RiFlagLine, roles: ['mentee'] },
-  { title: 'Collaborations', href: '/dashboard/collaborations', icon: RiGroupLine },
-  { title: 'Focuses', href: '/dashboard/focuses', icon: RiCalendarLine },
-  { title: 'Mentor Dashboard', href: '/dashboard/mentor', icon: RiUserStarLine, roles: ['mentor'] },
-  { title: 'Availability', href: '/dashboard/mentor/availability', icon: RiTimeLine, roles: ['mentor'], indent: true },
-  { title: 'Offers', href: '/dashboard/mentor/offers', icon: RiGiftLine, roles: ['mentor'], indent: true },
-  { title: 'Counselor', href: '/dashboard/counselor', icon: RiGraduationCapLine, roles: ['counselor'] },
-  { title: 'Settings', href: '/dashboard/settings', icon: RiSettings3Line },
+  { titleKey: 'dashboard', href: '/dashboard', icon: RiDashboardLine },
+  { titleKey: 'myGoals', href: '/dashboard/mentee/goals', icon: RiFlagLine, roles: ['mentee'] },
+  { titleKey: 'collaborations', href: '/dashboard/collaborations', icon: RiGroupLine },
+  { titleKey: 'sessions', href: '/dashboard/focuses', icon: RiCalendarLine },
+  { titleKey: 'mentorDashboard', href: '/dashboard/mentor', icon: RiUserStarLine, roles: ['mentor'] },
+  { titleKey: 'availability', href: '/dashboard/mentor/availability', icon: RiTimeLine, roles: ['mentor'], indent: true },
+  { titleKey: 'offers', href: '/dashboard/mentor/offers', icon: RiGiftLine, roles: ['mentor'], indent: true },
+  { titleKey: 'counselor', href: '/dashboard/counselor', icon: RiGraduationCapLine, roles: ['counselor'] },
+  { titleKey: 'settings', href: '/dashboard/settings', icon: RiSettings3Line },
 ]
 
-// Tight, non-bouncy layout spring — the BoardUI reflow recipe.
 const ACTIVE_PILL_SPRING = { type: 'spring', stiffness: 520, damping: 42, mass: 0.7 } as const
 
 interface DashboardSidebarProps {
@@ -52,9 +52,10 @@ interface DashboardSidebarProps {
 
 export function DashboardSidebar({ roles }: DashboardSidebarProps) {
   const pathname = usePathname()
+  const { t, locale } = useI18n()
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const isRTL = locale === 'ar'
 
-  // When roles are unknown (not passed), show role-agnostic items only
   const userRoles = roles ?? ['mentee']
   const visibleItems = navItems.filter(
     (item) => !item.roles || item.roles.some((role) => userRoles.includes(role))
@@ -69,39 +70,51 @@ export function DashboardSidebar({ roles }: DashboardSidebarProps) {
 
   return (
     <>
-      {/* Mobile menu button */}
-      <div className="fixed top-3.5 left-4 z-50 lg:hidden">
+      {/* Mobile menu button - positioned based on RTL */}
+      <div className={cx(
+        'fixed top-3.5 z-50 lg:hidden',
+        isRTL ? 'end-4' : 'start-4'
+      )}>
         <button
           type="button"
-          aria-label={isMobileOpen ? 'Close navigation' : 'Open navigation'}
+          aria-label={isMobileOpen ? t.nav.closeMenu : t.nav.openMenu}
           onClick={() => setIsMobileOpen(!isMobileOpen)}
-          className="flex size-9 cursor-pointer items-center justify-center rounded-2lg border border-border-button-default bg-background-primary-default text-foreground-icon-secondary shadow-xs transition-colors duration-150 hover:bg-background-primary-hover active:bg-background-primary-active"
+          className="flex size-9 cursor-pointer items-center justify-center rounded-md border border-ms-line bg-ms-surface-000 text-ms-ink-muted shadow-sm transition-colors duration-150 hover:bg-ms-surface-200 active:bg-ms-surface-200"
         >
           {isMobileOpen ? <RiCloseLine className="size-5" aria-hidden /> : <RiMenuLine className="size-5" aria-hidden />}
         </button>
       </div>
 
-      {/* Sidebar */}
+      {/* Sidebar - hidden on mobile unless open */}
       <aside
         className={cx(
-          'fixed inset-y-0 left-0 z-40 w-64 p-3 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] lg:translate-x-0',
-          isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          'fixed inset-y-0 z-40 w-[248px] p-3 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]',
+          isRTL ? 'end-0' : 'start-0',
+          isRTL
+            ? (isMobileOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0')
+            : (isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0')
         )}
       >
-        <div className="flex h-full flex-col rounded-3xl border border-border-button-default bg-background-primary-default shadow-sidebar">
+        <div className="flex h-full flex-col rounded-lg bg-ms-midnight shadow-sidebar">
+          {/* Logo */}
           <div className="flex h-16 items-center px-5">
             <Link href="/dashboard" className="flex items-center gap-2.5">
-              <span className="flex size-8 items-center justify-center rounded-2lg bg-button-primary text-[15px] font-semibold text-white shadow-xs">
+              {/* Ascent mark placeholder - two arches with spark */}
+              <span className="flex size-8 items-center justify-center rounded-lg bg-ms-ember text-ms-on-ember font-semibold text-[15px]">
                 M
               </span>
-              <span className="text-headline-semibold text-text-primary">Mentorshape</span>
+              <span className="text-ms-on-midnight font-semibold text-[17px] tracking-[-0.01em]">
+                mentorshape
+              </span>
             </Link>
           </div>
 
+          {/* Navigation */}
           <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 pb-3">
             {visibleItems.map((item) => {
               const Icon = item.icon
               const isActive = item.href === activeHref
+              const title = t.nav[item.titleKey]
 
               return (
                 <Link
@@ -110,40 +123,43 @@ export function DashboardSidebar({ roles }: DashboardSidebarProps) {
                   onClick={() => setIsMobileOpen(false)}
                   aria-current={isActive ? 'page' : undefined}
                   className={cx(
-                    'relative flex items-center gap-2.5 rounded-xl px-3 py-2 text-body-medium transition-colors duration-150',
+                    'relative flex items-center gap-2.5 rounded-md px-3 py-2 text-[15px] font-medium transition-colors duration-150',
                     isActive
-                      ? 'text-text-primary'
-                      : 'text-text-secondary hover:bg-background-secondary-hover hover:text-text-primary active:bg-background-secondary-active',
-                    item.indent && 'ml-4'
+                      ? 'text-ms-on-midnight'
+                      : 'text-ms-on-midnight/70 hover:bg-ms-midnight-700 hover:text-ms-on-midnight',
+                    item.indent && (isRTL ? 'me-4' : 'ms-4')
                   )}
                 >
                   {isActive && (
                     <motion.span
                       layoutId="dashboard-sidebar-active"
                       transition={ACTIVE_PILL_SPRING}
-                      className="absolute inset-0 rounded-xl bg-background-secondary-default"
+                      className="absolute inset-0 rounded-md bg-ms-midnight-700"
                       aria-hidden
                     />
                   )}
                   <Icon
                     className={cx(
                       'relative size-[18px] shrink-0',
-                      isActive ? 'text-foreground-icon-primary' : 'text-foreground-icon-secondary'
+                      isActive ? 'text-ms-ember' : 'text-ms-on-midnight/60'
                     )}
                   />
-                  <span className="relative">{item.title}</span>
+                  <span className="relative">{title}</span>
                 </Link>
               )
             })}
           </nav>
 
-          <div className="border-t border-separator-border px-5 py-4">
-            <p className="text-caption-1-medium text-text-tertiary">School pilot MVP</p>
+          {/* Footer */}
+          <div className="border-t border-ms-midnight-700 px-5 py-4">
+            <p className="text-[13px] leading-[18px] text-ms-on-midnight/50">
+              {t.app.pilotLabel}
+            </p>
           </div>
         </div>
       </aside>
 
-      {/* Overlay for mobile */}
+      {/* Mobile overlay */}
       {isMobileOpen && (
         <div
           className="fixed inset-0 z-30 bg-black/70 transition-opacity duration-300 ease-out lg:hidden"

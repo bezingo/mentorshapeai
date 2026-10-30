@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./theme.css";
 @import "./typography.css";
+@import "./mentorshape-theme.css";
 /* Legacy shadcn token layer (kept for unmigrated `@/components/ui/*` forms).
  * It no longer imports Tailwind itself — this file is the single entry. */
 @import "../app/globals.css";
