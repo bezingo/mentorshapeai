@@ -88,6 +88,43 @@ export async function isOrgAdmin(profileId: string): Promise<boolean> {
 }
 
 /**
+ * Get org admin access info for API routes
+ * Returns org_id and profile_id if user has admin/owner/career_office access
+ */
+export async function getOrgAdminAccess(
+  supabase: ReturnType<typeof createServiceClient>,
+  userId: string
+): Promise<{ orgId: string; profileId: string; role: string } | null> {
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('user_id', userId)
+    .single()
+
+  if (!profile) {
+    return null
+  }
+
+  const { data: membership } = await supabase
+    .from('org_members')
+    .select('org_id, role')
+    .eq('profile_id', profile.id)
+    .in('role', ['owner', 'admin', 'career_office'])
+    .eq('status', 'active')
+    .single()
+
+  if (!membership) {
+    return null
+  }
+
+  return {
+    orgId: membership.org_id,
+    profileId: profile.id,
+    role: membership.role
+  }
+}
+
+/**
  * Check if a user belongs to the same org as another user
  */
 export async function areInSameOrg(profileId1: string, profileId2: string): Promise<boolean> {
