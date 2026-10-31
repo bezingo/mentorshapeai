@@ -51,7 +51,7 @@ CREATE POLICY "Admins can manage cycles"
       JOIN public.org_members om ON om.org_id = p.org_id
       WHERE p.id = program_cycles.program_id
       AND om.profile_id = public.get_profile_id()
-      AND om.role IN ('admin', 'owner', 'counselor')
+      AND om.role IN ('admin', 'owner', 'career_office')
     )
   );
 
@@ -113,7 +113,7 @@ CREATE POLICY "Admins can view all requests in their programs"
       JOIN public.org_members om ON om.org_id = p.org_id
       WHERE pc.id = mentee_requests.cycle_id
       AND om.profile_id = public.get_profile_id()
-      AND om.role IN ('admin', 'owner', 'counselor')
+      AND om.role IN ('admin', 'owner', 'career_office')
     )
   );
 
@@ -145,7 +145,7 @@ CREATE POLICY "Admins can manage all requests"
       JOIN public.org_members om ON om.org_id = p.org_id
       WHERE pc.id = mentee_requests.cycle_id
       AND om.profile_id = public.get_profile_id()
-      AND om.role IN ('admin', 'owner', 'counselor')
+      AND om.role IN ('admin', 'owner', 'career_office')
     )
   );
 
@@ -207,7 +207,7 @@ SELECT
   p.avatar_url,
   p.headline,
   p.bio,
-  p.locale,
+  p.language AS locale,
   p.expertise_areas,
   p.languages,
   COALESCE(
