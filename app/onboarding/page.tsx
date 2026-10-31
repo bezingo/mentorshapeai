@@ -120,13 +120,13 @@ export default function OnboardingPage() {
       if (profileData.avatarFile) {
         const formData = new FormData()
         formData.append('file', profileData.avatarFile)
-        const res = await fetch('/api/upload/avatar', {
+        const res = await fetch('/api/profile/avatar', {
           method: 'POST',
           body: formData,
         })
         if (res.ok) {
           const result = await res.json()
-          avatarUrl = result.url
+          avatarUrl = result.data?.avatar_url
         }
       }
 
