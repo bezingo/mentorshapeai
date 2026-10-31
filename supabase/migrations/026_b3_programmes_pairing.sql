@@ -18,21 +18,7 @@ ALTER TABLE public.matches
   ADD COLUMN IF NOT EXISTS declined_reason TEXT,
   ADD COLUMN IF NOT EXISTS swap_for UUID REFERENCES public.matches(id);
 
--- Update match_status enum if needed (add 'approved', 'intro_sent', 'accepted', 'declined')
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'approved' AND enumtypid = 'match_status'::regtype) THEN
-    ALTER TYPE match_status ADD VALUE 'approved';
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'intro_sent' AND enumtypid = 'match_status'::regtype) THEN
-    ALTER TYPE match_status ADD VALUE 'intro_sent';
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'accepted' AND enumtypid = 'match_status'::regtype) THEN
-    ALTER TYPE match_status ADD VALUE 'accepted';
-  END IF;
-EXCEPTION WHEN others THEN
-  NULL;
-END $$;
+-- NOTE: New match_status enum values (approved, intro_sent, accepted) are added in 024a_enum_values.sql
 
 COMMENT ON COLUMN public.matches.reasons IS 'Array of match reasons (goal_match, programme_match, language_match, capacity_available)';
 COMMENT ON COLUMN public.matches.approved_by IS 'Admin who approved this match';
