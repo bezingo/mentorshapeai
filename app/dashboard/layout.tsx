@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import { redirect } from 'next/navigation'
 import { DashboardSidebar } from '@/components/layout/dashboard-sidebar'
 import { DashboardHeader } from '@/components/layout/dashboard-header'
 import { MobileBottomNav } from '@/components/layout/mobile-bottom-nav'
@@ -16,6 +17,12 @@ export default async function DashboardLayout({
 }) {
   // Resolve roles for navigation (profile auto-creates on first login)
   const profile = await getCurrentProfile()
+  
+  // Redirect to onboarding if not completed
+  if (profile && profile.onboarding_state !== 'completed') {
+    redirect('/onboarding')
+  }
+  
   const orgMembership = profile ? await getOrgMembership(profile.id) : null
 
   const roles: ('mentor' | 'mentee' | 'counselor')[] = []
