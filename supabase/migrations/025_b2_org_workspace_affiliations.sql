@@ -2,28 +2,9 @@
 -- Adds organization workspace management, expanded invite system, affiliations, and verification
 
 -- =====================================================
--- ENHANCE ORG_MEMBERS ROLES
+-- ORG_MEMBERS ROLES
 -- =====================================================
-
--- Drop and recreate org_member_role with expanded roles
-DO $$
-BEGIN
-  -- Check if the type exists and add new values if needed
-  IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'owner' AND enumtypid = 'org_member_role'::regtype) THEN
-    ALTER TYPE org_member_role ADD VALUE IF NOT EXISTS 'owner';
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'career_office' AND enumtypid = 'org_member_role'::regtype) THEN
-    ALTER TYPE org_member_role ADD VALUE IF NOT EXISTS 'career_office';
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'faculty' AND enumtypid = 'org_member_role'::regtype) THEN
-    ALTER TYPE org_member_role ADD VALUE IF NOT EXISTS 'faculty';
-  END IF;
-EXCEPTION WHEN undefined_object THEN
-  -- Type doesn't exist yet, create it
-  CREATE TYPE org_member_role AS ENUM ('owner', 'admin', 'career_office', 'faculty', 'mentor', 'mentee');
-END $$;
-
-COMMENT ON TYPE org_member_role IS 'Organization member roles: owner, admin, career_office, faculty, mentor, mentee';
+-- NOTE: New enum values (owner, career_office, faculty) are added in 024a_enum_values.sql
 
 -- =====================================================
 -- ENHANCE ORGANIZATIONS TABLE

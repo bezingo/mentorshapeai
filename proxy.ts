@@ -17,7 +17,15 @@ const publicRoutes = [
   '/onboarding/demo', // Demo page for screenshots
   '/g/', // Public goal pages (prefix match)
   '/m/', // Public mentor pages (prefix match)
+  '/s/', // Short link redirects (prefix match)
+  // Marketing pages
   '/pricing',
+  '/for-schools',
+  '/for-mentors',
+  '/about',
+  '/privacy',
+  '/terms',
+  // API routes
   '/api/auth/', // Better Auth routes
   '/api/webhook/', // Webhook endpoints
   '/api/onboarding/', // Onboarding API routes
