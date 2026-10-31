@@ -218,13 +218,13 @@ BEGIN
         'id', mo.id,
         'title', mo.title,
         'description', mo.description,
-        'category', mo.category,
-        'is_free', mo.is_free,
-        'price', mo.price,
+        'type', mo.type::text,
+        'is_free', (mo.price_cents IS NULL OR mo.price_cents = 0),
+        'price_cents', mo.price_cents,
         'duration_minutes', mo.duration_minutes
       ))
       FROM public.mentor_offers mo 
-      WHERE mo.profile_id = p.id 
+      WHERE mo.mentor_profile_id = p.id 
       AND mo.is_active = TRUE),
       '[]'::jsonb
     ) as active_offers
