@@ -8,7 +8,6 @@ import {
   ChevronDown,
   ChevronUp,
   Star,
-  Share2,
   Pencil,
   Globe,
   Clock,
@@ -28,6 +27,8 @@ import {
   PublicMentorOffer,
   RequestMentorshipModal,
 } from '@/components/mentor/profile'
+import { VerifiedBadge } from '@/components/ui/verified-badge'
+import { ShareButton } from '@/components/onelink/share-button'
 
 // Profile type definition
 interface Profile {
@@ -55,7 +56,17 @@ interface Profile {
   work_history_public: boolean
   education_public: boolean
   skills_public: boolean
+  goals_public: boolean
+  affiliations_public: boolean
   invite_only: boolean
+  page_mode: 'mentor' | 'mentee' | 'both' | null
+  verified_affiliations: Array<{
+    org_id: string
+    org_name: string
+    kind: string
+    graduation_year: number | null
+    verified_at: string
+  }>
   updated_at: string | null
 }
 
@@ -369,12 +380,24 @@ function MentorProfileContent({
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto max-w-2xl px-4 py-8 sm:py-12">
+        {/* Share Button - top right */}
+        <div className="flex justify-end mb-4">
+          <ShareButton profileId={profile.id} handle={profile.public_handle} />
+        </div>
+
         {/* Mentor Profile Hero */}
         <MentorProfileHero
           mentor={heroData}
           isOwnProfile={isOwnProfile}
           className="mb-8"
         />
+
+        {/* Verified Affiliations */}
+        {profile.affiliations_public && profile.verified_affiliations && profile.verified_affiliations.length > 0 && (
+          <div className="mb-6">
+            <VerifiedBadge affiliations={profile.verified_affiliations} showAll />
+          </div>
+        )}
 
         {/* Main Content Sections */}
         <div className="space-y-8">
@@ -536,27 +559,14 @@ function RegularProfileContent({
 }: PublicProfileContentProps) {
   const daysSinceUpdate = getDaysSinceUpdate(profile.updated_at)
 
-  const handleShareProfile = async () => {
-    const profileUrl = `${window.location.origin}/m/${profile.public_handle}`
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${profile.display_name} | Mentor on Mentorshape`,
-          text: profile.headline || 'Check out this profile on Mentorshape',
-          url: profileUrl,
-        })
-      } catch {
-        await navigator.clipboard.writeText(profileUrl)
-      }
-    } else {
-      await navigator.clipboard.writeText(profileUrl)
-    }
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto max-w-2xl px-4 py-8 sm:py-12">
+        {/* Share Button - top right */}
+        <div className="flex justify-end mb-4">
+          <ShareButton profileId={profile.id} handle={profile.public_handle} />
+        </div>
+
         {/* Profile Header */}
         <div className="flex flex-col items-center text-center mb-8">
           {/* Avatar */}
@@ -605,29 +615,29 @@ function RegularProfileContent({
             </span>
           </div>
 
+          {/* Verified Affiliations */}
+          {profile.affiliations_public && profile.verified_affiliations && profile.verified_affiliations.length > 0 && (
+            <div className="mt-3">
+              <VerifiedBadge affiliations={profile.verified_affiliations} showAll />
+            </div>
+          )}
+
           {/* Star Rating (placeholder) */}
           <div className="mt-3">
             <StarRating rating={3} />
           </div>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 mt-6 w-full sm:w-auto">
-            {isOwnProfile && (
-              <Button variant="outline" className="w-full sm:w-auto" asChild>
+          {isOwnProfile && (
+            <div className="mt-6">
+              <Button variant="outline" asChild>
                 <Link href="/dashboard/profile">
                   <Pencil className="mr-2 h-4 w-4" />
                   Edit Profile
                 </Link>
               </Button>
-            )}
-            <Button
-              onClick={handleShareProfile}
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <Share2 className="mr-2 h-4 w-4" />
-              Share my Profile
-            </Button>
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Mentor-Specific Fields */}
