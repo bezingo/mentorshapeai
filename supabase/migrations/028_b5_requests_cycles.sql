@@ -38,7 +38,7 @@ CREATE POLICY "Users can view cycles in their org programs"
       JOIN public.organizations o ON o.id = p.org_id
       JOIN public.affiliations a ON a.org_id = o.id
       WHERE p.id = program_cycles.program_id
-      AND a.profile_id = auth.get_profile_id()
+      AND a.profile_id = public.get_profile_id()
       AND a.verified_at IS NOT NULL
     )
   );
@@ -50,7 +50,7 @@ CREATE POLICY "Admins can manage cycles"
       SELECT 1 FROM public.programs p
       JOIN public.org_members om ON om.org_id = p.org_id
       WHERE p.id = program_cycles.program_id
-      AND om.profile_id = auth.get_profile_id()
+      AND om.profile_id = public.get_profile_id()
       AND om.role IN ('admin', 'owner', 'counselor')
     )
   );
@@ -98,11 +98,11 @@ ALTER TABLE public.mentee_requests ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Mentees can view own requests"
   ON public.mentee_requests FOR SELECT
-  USING (mentee_profile_id = auth.get_profile_id());
+  USING (mentee_profile_id = public.get_profile_id());
 
 CREATE POLICY "Mentors can view requests for them"
   ON public.mentee_requests FOR SELECT
-  USING (mentor_profile_id = auth.get_profile_id());
+  USING (mentor_profile_id = public.get_profile_id());
 
 CREATE POLICY "Admins can view all requests in their programs"
   ON public.mentee_requests FOR SELECT
@@ -112,7 +112,7 @@ CREATE POLICY "Admins can view all requests in their programs"
       JOIN public.programs p ON p.id = pc.program_id
       JOIN public.org_members om ON om.org_id = p.org_id
       WHERE pc.id = mentee_requests.cycle_id
-      AND om.profile_id = auth.get_profile_id()
+      AND om.profile_id = public.get_profile_id()
       AND om.role IN ('admin', 'owner', 'counselor')
     )
   );
@@ -120,7 +120,7 @@ CREATE POLICY "Admins can view all requests in their programs"
 CREATE POLICY "Mentees can create requests in open cycles"
   ON public.mentee_requests FOR INSERT
   WITH CHECK (
-    mentee_profile_id = auth.get_profile_id()
+    mentee_profile_id = public.get_profile_id()
     AND EXISTS (
       SELECT 1 FROM public.program_cycles pc
       WHERE pc.id = cycle_id
@@ -132,7 +132,7 @@ CREATE POLICY "Mentees can create requests in open cycles"
 CREATE POLICY "Mentees can update own pending requests"
   ON public.mentee_requests FOR UPDATE
   USING (
-    mentee_profile_id = auth.get_profile_id()
+    mentee_profile_id = public.get_profile_id()
     AND status = 'pending'
   );
 
@@ -144,7 +144,7 @@ CREATE POLICY "Admins can manage all requests"
       JOIN public.programs p ON p.id = pc.program_id
       JOIN public.org_members om ON om.org_id = p.org_id
       WHERE pc.id = mentee_requests.cycle_id
-      AND om.profile_id = auth.get_profile_id()
+      AND om.profile_id = public.get_profile_id()
       AND om.role IN ('admin', 'owner', 'counselor')
     )
   );

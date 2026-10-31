@@ -166,17 +166,17 @@ ALTER TABLE public.verification_codes ENABLE ROW LEVEL SECURITY;
 -- Affiliations: Users can view their own
 CREATE POLICY "Users can view own affiliations"
   ON public.affiliations FOR SELECT
-  USING (profile_id = auth.get_profile_id());
+  USING (profile_id = public.get_profile_id());
 
 -- Affiliations: Users can create their own
 CREATE POLICY "Users can create own affiliations"
   ON public.affiliations FOR INSERT
-  WITH CHECK (profile_id = auth.get_profile_id());
+  WITH CHECK (profile_id = public.get_profile_id());
 
 -- Affiliations: Users can update their own pending affiliations
 CREATE POLICY "Users can update own pending affiliations"
   ON public.affiliations FOR UPDATE
-  USING (profile_id = auth.get_profile_id() AND status = 'pending');
+  USING (profile_id = public.get_profile_id() AND status = 'pending');
 
 -- Affiliations: Org admins can view all in their org
 CREATE POLICY "Org admins can view org affiliations"
@@ -185,7 +185,7 @@ CREATE POLICY "Org admins can view org affiliations"
     EXISTS (
       SELECT 1 FROM public.org_members om
       WHERE om.org_id = affiliations.org_id
-      AND om.profile_id = auth.get_profile_id()
+      AND om.profile_id = public.get_profile_id()
       AND om.role IN ('owner', 'admin', 'career_office')
     )
   );
@@ -197,7 +197,7 @@ CREATE POLICY "Org admins can update org affiliations"
     EXISTS (
       SELECT 1 FROM public.org_members om
       WHERE om.org_id = affiliations.org_id
-      AND om.profile_id = auth.get_profile_id()
+      AND om.profile_id = public.get_profile_id()
       AND om.role IN ('owner', 'admin', 'career_office')
     )
   );
@@ -210,7 +210,7 @@ CREATE POLICY "Service role manages affiliations"
 -- Verification codes: Users can view their own
 CREATE POLICY "Users can view own verification codes"
   ON public.verification_codes FOR SELECT
-  USING (profile_id = auth.get_profile_id());
+  USING (profile_id = public.get_profile_id());
 
 -- Service role manages verification codes
 CREATE POLICY "Service role manages verification codes"
@@ -228,7 +228,7 @@ CREATE POLICY "Org admins can view org invites"
     EXISTS (
       SELECT 1 FROM public.org_members om
       WHERE om.org_id = org_invites.org_id
-      AND om.profile_id = auth.get_profile_id()
+      AND om.profile_id = public.get_profile_id()
       AND om.role IN ('owner', 'admin', 'career_office')
     )
   );
@@ -240,7 +240,7 @@ CREATE POLICY "Org admins can create org invites"
     EXISTS (
       SELECT 1 FROM public.org_members om
       WHERE om.org_id = org_invites.org_id
-      AND om.profile_id = auth.get_profile_id()
+      AND om.profile_id = public.get_profile_id()
       AND om.role IN ('owner', 'admin', 'career_office')
     )
   );
@@ -252,7 +252,7 @@ CREATE POLICY "Org admins can update org invites"
     EXISTS (
       SELECT 1 FROM public.org_members om
       WHERE om.org_id = org_invites.org_id
-      AND om.profile_id = auth.get_profile_id()
+      AND om.profile_id = public.get_profile_id()
       AND om.role IN ('owner', 'admin', 'career_office')
     )
   );
