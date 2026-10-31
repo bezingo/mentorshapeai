@@ -57,12 +57,12 @@ CREATE POLICY "Users can view public onelink blocks"
   ON public.onelink_blocks FOR SELECT
   USING (
     is_hidden = FALSE OR
-    profile_id = auth.get_profile_id()
+    profile_id = public.get_profile_id()
   );
 
 CREATE POLICY "Users can manage own onelink blocks"
   ON public.onelink_blocks FOR ALL
-  USING (profile_id = auth.get_profile_id());
+  USING (profile_id = public.get_profile_id());
 
 CREATE POLICY "Service role manages onelink blocks"
   ON public.onelink_blocks FOR ALL
@@ -106,7 +106,7 @@ ALTER TABLE public.onelink_events ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Profile owners can view own events"
   ON public.onelink_events FOR SELECT
-  USING (profile_id = auth.get_profile_id());
+  USING (profile_id = public.get_profile_id());
 
 CREATE POLICY "Anyone can create events"
   ON public.onelink_events FOR INSERT
@@ -167,7 +167,7 @@ CREATE POLICY "Anyone can view share links"
 
 CREATE POLICY "Profile owners manage own share links"
   ON public.share_links FOR ALL
-  USING (profile_id = auth.get_profile_id());
+  USING (profile_id = public.get_profile_id());
 
 CREATE POLICY "Service role manages share links"
   ON public.share_links FOR ALL

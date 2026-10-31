@@ -28,7 +28,7 @@ ALTER TABLE public.focus_recording_consents ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view own recording consents"
   ON public.focus_recording_consents FOR SELECT
-  USING (profile_id = auth.get_profile_id());
+  USING (profile_id = public.get_profile_id());
 
 CREATE POLICY "Users can view consents in their collaborations"
   ON public.focus_recording_consents FOR SELECT
@@ -37,17 +37,17 @@ CREATE POLICY "Users can view consents in their collaborations"
       SELECT 1 FROM public.focuses f
       JOIN public.collaborations c ON c.id = f.collaboration_id
       WHERE f.id = focus_recording_consents.focus_id
-      AND (c.mentor_profile_id = auth.get_profile_id() OR c.mentee_profile_id = auth.get_profile_id())
+      AND (c.mentor_profile_id = public.get_profile_id() OR c.mentee_profile_id = public.get_profile_id())
     )
   );
 
 CREATE POLICY "Users can create own recording consents"
   ON public.focus_recording_consents FOR INSERT
-  WITH CHECK (profile_id = auth.get_profile_id());
+  WITH CHECK (profile_id = public.get_profile_id());
 
 CREATE POLICY "Users can update own recording consents"
   ON public.focus_recording_consents FOR UPDATE
-  USING (profile_id = auth.get_profile_id());
+  USING (profile_id = public.get_profile_id());
 
 CREATE POLICY "Service role manages recording consents"
   ON public.focus_recording_consents FOR ALL
@@ -94,7 +94,7 @@ ALTER TABLE public.focus_notes ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view own notes"
   ON public.focus_notes FOR SELECT
-  USING (profile_id = auth.get_profile_id());
+  USING (profile_id = public.get_profile_id());
 
 CREATE POLICY "Users can view shared notes in their collaborations"
   ON public.focus_notes FOR SELECT
@@ -104,29 +104,29 @@ CREATE POLICY "Users can view shared notes in their collaborations"
       SELECT 1 FROM public.focuses f
       JOIN public.collaborations c ON c.id = f.collaboration_id
       WHERE f.id = focus_notes.focus_id
-      AND (c.mentor_profile_id = auth.get_profile_id() OR c.mentee_profile_id = auth.get_profile_id())
+      AND (c.mentor_profile_id = public.get_profile_id() OR c.mentee_profile_id = public.get_profile_id())
     )
   );
 
 CREATE POLICY "Users can create notes in their collaborations"
   ON public.focus_notes FOR INSERT
   WITH CHECK (
-    profile_id = auth.get_profile_id()
+    profile_id = public.get_profile_id()
     AND EXISTS (
       SELECT 1 FROM public.focuses f
       JOIN public.collaborations c ON c.id = f.collaboration_id
       WHERE f.id = focus_id
-      AND (c.mentor_profile_id = auth.get_profile_id() OR c.mentee_profile_id = auth.get_profile_id())
+      AND (c.mentor_profile_id = public.get_profile_id() OR c.mentee_profile_id = public.get_profile_id())
     )
   );
 
 CREATE POLICY "Users can update own notes"
   ON public.focus_notes FOR UPDATE
-  USING (profile_id = auth.get_profile_id());
+  USING (profile_id = public.get_profile_id());
 
 CREATE POLICY "Users can delete own notes"
   ON public.focus_notes FOR DELETE
-  USING (profile_id = auth.get_profile_id());
+  USING (profile_id = public.get_profile_id());
 
 CREATE POLICY "Service role manages notes"
   ON public.focus_notes FOR ALL

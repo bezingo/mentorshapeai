@@ -40,7 +40,7 @@ ALTER TABLE public.scheduled_reminders ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view own reminders"
   ON public.scheduled_reminders FOR SELECT
-  USING (profile_id = auth.get_profile_id());
+  USING (profile_id = public.get_profile_id());
 
 CREATE POLICY "Service role manages reminders"
   ON public.scheduled_reminders FOR ALL
@@ -98,7 +98,7 @@ ALTER TABLE public.guardian_consents ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view own guardian consents"
   ON public.guardian_consents FOR SELECT
-  USING (profile_id = auth.get_profile_id());
+  USING (profile_id = public.get_profile_id());
 
 CREATE POLICY "Service role manages guardian consents"
   ON public.guardian_consents FOR ALL
