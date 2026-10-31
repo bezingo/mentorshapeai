@@ -136,7 +136,7 @@ BEGIN
     SELECT 
       pp.profile_id,
       COALESCE(
-        (SELECT array_agg(DISTINCT mo.category) FROM public.mentor_offers mo WHERE mo.profile_id = pp.profile_id AND mo.is_active),
+        (SELECT array_agg(DISTINCT mo.type::text) FROM public.mentor_offers mo WHERE mo.mentor_profile_id = pp.profile_id AND mo.is_active),
         '{}'::text[]
       ) as offer_categories,
       p.language AS locale,
