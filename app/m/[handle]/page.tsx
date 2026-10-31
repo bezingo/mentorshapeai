@@ -39,8 +39,20 @@ interface Profile {
   work_history_public: boolean
   education_public: boolean
   skills_public: boolean
+  goals_public: boolean
+  affiliations_public: boolean
   // Mentor settings
   invite_only: boolean
+  // Page mode
+  page_mode: 'mentor' | 'mentee' | 'both' | null
+  // Verified affiliations (cached)
+  verified_affiliations: Array<{
+    org_id: string
+    org_name: string
+    kind: string
+    graduation_year: number | null
+    verified_at: string
+  }>
   // Timestamps
   updated_at: string | null
 }
@@ -178,6 +190,15 @@ export default async function PublicMentorPage({ params }: PageProps) {
   // Get most recent work and education for header display
   const currentCompany = workExperiences.length > 0 ? workExperiences[0].company : null
   const currentUniversity = educations.length > 0 ? educations[0].institution : null
+
+  // Track page view (fire and forget)
+  if (!isOwnProfile) {
+    fetch(`${process.env.NEXT_PUBLIC_APP_URL || ''}/api/onelink/event`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile_id: typedProfile.id, event_type: 'view' })
+    }).catch(() => {})
+  }
 
   return (
     <PublicProfileContent
