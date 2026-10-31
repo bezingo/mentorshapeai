@@ -351,6 +351,26 @@ export const en = {
     waitingForOther: 'Waiting for other party to grade',
     bothGraded: 'Both parties have graded',
   },
+  emailPreferences: {
+    title: 'Email Preferences',
+    digestEnabled: 'Daily Digest',
+    digestDescription: 'Receive a daily summary of tasks, sessions, and requests',
+    digestFrequency: 'Frequency',
+    daily: 'Daily',
+    weekly: 'Weekly',
+    digestHour: 'Send Time (UTC)',
+    reminderEmails: 'Session Reminders',
+    reminderDescription: 'Get reminded about upcoming focus sessions',
+    guardianConsent: 'Guardian Consent',
+    requestConsent: 'Request Consent',
+    guardianEmail: 'Guardian Email',
+    guardianName: 'Guardian Name (optional)',
+    consentPending: 'Awaiting Response',
+    consentApproved: 'Approved',
+    consentDenied: 'Denied',
+    consentExpired: 'Expired',
+    resendRequest: 'Resend Request',
+  },
 }
 
 export type Translations = typeof en
