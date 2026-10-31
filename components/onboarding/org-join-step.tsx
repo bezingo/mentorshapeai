@@ -1,16 +1,22 @@
 'use client'
 
-import { useState } from 'react'
-import { Building2, Mail, Key, ArrowRight, Loader2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Building2, Mail, Key, ArrowRight, Loader2, CheckCircle, Globe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useI18n } from '@/lib/i18n'
 
 interface OrgJoinStepProps {
-  onSubmit: (data: { inviteCode?: string; skipOrg: boolean }) => void
+  onSubmit: (data: { inviteCode?: string; skipOrg: boolean; orgJoined?: { org_id: string; org_name: string; role: string } }) => void
   userEmail?: string
   isLoading?: boolean
+}
+
+interface DomainOrg {
+  id: string
+  name: string
+  crest_url: string | null
 }
 
 export function OrgJoinStep({ onSubmit, userEmail, isLoading = false }: OrgJoinStepProps) {
@@ -19,18 +25,104 @@ export function OrgJoinStep({ onSubmit, userEmail, isLoading = false }: OrgJoinS
 
   const [inviteCode, setInviteCode] = useState('')
   const [showInviteInput, setShowInviteInput] = useState(false)
+  const [isJoining, setIsJoining] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [domainOrg, setDomainOrg] = useState<DomainOrg | null>(null)
+  const [checkingDomain, setCheckingDomain] = useState(true)
 
   const emailDomain = userEmail?.split('@')[1] || ''
 
-  const handleJoinWithCode = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (emailDomain) {
+      checkDomainOrg()
+    } else {
+      setCheckingDomain(false)
+    }
+  }, [emailDomain])
+
+  async function checkDomainOrg() {
+    try {
+      const response = await fetch('/api/org/invites/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ auto_domain: true }),
+      })
+      
+      if (response.ok) {
+        const json = await response.json()
+        setDomainOrg({
+          id: json.data.org_id,
+          name: json.data.org_name,
+          crest_url: null
+        })
+        onSubmit({ skipOrg: false, orgJoined: json.data })
+        return
+      }
+    } catch {
+      // Domain org check failed, continue with manual flow
+    }
+    setCheckingDomain(false)
+  }
+
+  const handleJoinWithCode = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (inviteCode.trim()) {
-      onSubmit({ inviteCode: inviteCode.trim(), skipOrg: false })
+    if (!inviteCode.trim()) return
+
+    setIsJoining(true)
+    setError(null)
+
+    try {
+      const response = await fetch('/api/org/invites/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invite_code: inviteCode.trim() }),
+      })
+
+      const json = await response.json()
+
+      if (response.ok) {
+        onSubmit({ inviteCode: inviteCode.trim(), skipOrg: false, orgJoined: json.data })
+      } else {
+        setError(json.error || (isArabic ? 'رمز غير صالح' : 'Invalid code'))
+      }
+    } catch {
+      setError(isArabic ? 'خطأ في الشبكة' : 'Network error')
+    } finally {
+      setIsJoining(false)
     }
   }
 
   const handleSkip = () => {
     onSubmit({ skipOrg: true })
+  }
+
+  if (checkingDomain) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <Loader2 className="size-8 animate-spin text-ms-ember mb-4" />
+        <p className="text-sm text-ms-ink-muted">
+          {isArabic ? 'جاري التحقق من نطاق البريد...' : 'Checking email domain...'}
+        </p>
+      </div>
+    )
+  }
+
+  if (domainOrg) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 text-center">
+        <div className="size-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+          <CheckCircle className="size-8 text-green-600" />
+        </div>
+        <h3 className="text-lg font-semibold text-ms-ink mb-2">
+          {isArabic ? 'تم الانضمام تلقائياً!' : 'Auto-joined!'}
+        </h3>
+        <p className="text-ms-ink-muted">
+          {isArabic
+            ? `تم إضافتك تلقائياً إلى ${domainOrg.name}`
+            : `You've been automatically added to ${domainOrg.name}`}
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -75,10 +167,13 @@ export function OrgJoinStep({ onSubmit, userEmail, isLoading = false }: OrgJoinS
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                 className={`${isRTL ? 'pe-9 ps-3' : 'ps-9 pe-3'} bg-ms-surface-000 border-ms-line text-ms-ink placeholder:text-ms-ink-subtle focus:border-ms-ember focus:ring-ms-ember uppercase tracking-wider`}
-                disabled={isLoading}
+                disabled={isLoading || isJoining}
                 dir="ltr"
               />
             </div>
+            {error && (
+              <p className="text-xs text-red-500">{error}</p>
+            )}
             <p className="text-xs text-ms-ink-subtle">
               {isArabic
                 ? 'يمكنك الحصول على رمز الدعوة من مسؤول مؤسستك'
@@ -90,18 +185,18 @@ export function OrgJoinStep({ onSubmit, userEmail, isLoading = false }: OrgJoinS
             <Button
               type="button"
               variant="outline"
-              onClick={() => setShowInviteInput(false)}
+              onClick={() => { setShowInviteInput(false); setError(null) }}
               className="flex-1 border-ms-line text-ms-ink"
-              disabled={isLoading}
+              disabled={isLoading || isJoining}
             >
               {t.common.back}
             </Button>
             <Button
               type="submit"
-              disabled={!inviteCode.trim() || isLoading}
+              disabled={!inviteCode.trim() || isLoading || isJoining}
               className="flex-1 bg-ms-ember text-ms-on-ember hover:bg-ms-ember/90 font-semibold"
             >
-              {isLoading ? (
+              {(isLoading || isJoining) ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 isArabic ? 'انضم' : 'Join'

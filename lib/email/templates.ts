@@ -334,3 +334,183 @@ You can accept, decline, or ask questions about this request.
     text,
   }
 }
+
+// ============================================================
+// ORG INVITE EMAIL
+// ============================================================
+
+export interface OrgInviteData {
+  orgName: string
+  inviteCode: string
+  inviteUrl: string
+  language: string
+  crestUrl?: string | null
+}
+
+export function orgInviteTemplate(data: OrgInviteData): string {
+  const { orgName, inviteCode, inviteUrl, language, crestUrl } = data
+  const isArabic = language === 'ar'
+  const dir = isArabic ? 'rtl' : 'ltr'
+
+  const translations = {
+    en: {
+      subject: `Invitation to join ${orgName}`,
+      heading: `You're invited to join ${orgName}`,
+      body: `You've been invited to join ${orgName} on Mentorshape, a platform for meaningful mentorship connections.`,
+      codeLabel: 'Your invite code:',
+      buttonText: 'Accept Invitation',
+      orText: 'Or enter this code when signing up:',
+      expiry: 'This invitation expires in 7 days.',
+      footer: 'If you didn\'t expect this invitation, you can ignore this email.',
+    },
+    ar: {
+      subject: `دعوة للانضمام إلى ${orgName}`,
+      heading: `تمت دعوتك للانضمام إلى ${orgName}`,
+      body: `لقد تمت دعوتك للانضمام إلى ${orgName} على منصة Mentorshape، منصة للإرشاد الهادف.`,
+      codeLabel: 'رمز الدعوة الخاص بك:',
+      buttonText: 'قبول الدعوة',
+      orText: 'أو أدخل هذا الرمز عند التسجيل:',
+      expiry: 'تنتهي صلاحية هذه الدعوة خلال 7 أيام.',
+      footer: 'إذا لم تكن تتوقع هذه الدعوة، يمكنك تجاهل هذا البريد الإلكتروني.',
+    }
+  }
+
+  const t = translations[isArabic ? 'ar' : 'en']
+
+  return `
+<!DOCTYPE html>
+<html dir="${dir}" lang="${language}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${t.subject}</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 600px; margin: 0 auto; padding: 20px; direction: ${dir};">
+  <div style="background: #f8fafc; border-radius: 12px; padding: 32px;">
+    <div style="text-align: center; margin-bottom: 24px;">
+      ${crestUrl ? `<img src="${crestUrl}" alt="${orgName}" style="height: 64px; margin-bottom: 16px;">` : ''}
+      <h1 style="font-size: 24px; font-weight: 700; margin: 0; color: #0f172a;">${t.heading}</h1>
+    </div>
+    
+    <div style="background: #fff; border-radius: 8px; padding: 24px; margin-bottom: 16px; text-align: center;">
+      <p style="margin: 0 0 24px; color: #475569;">${t.body}</p>
+      
+      <a href="${inviteUrl}" style="display: inline-block; padding: 14px 32px; background: #E05D31; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+        ${t.buttonText}
+      </a>
+      
+      <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e2e8f0;">
+        <p style="margin: 0 0 8px; color: #64748b; font-size: 14px;">${t.orText}</p>
+        <div style="background: #f1f5f9; padding: 12px 24px; border-radius: 6px; display: inline-block;">
+          <code style="font-size: 20px; font-weight: 700; letter-spacing: 2px; color: #0f172a;">${inviteCode}</code>
+        </div>
+      </div>
+    </div>
+    
+    <p style="text-align: center; margin: 0 0 16px; color: #94a3b8; font-size: 14px;">${t.expiry}</p>
+    <p style="text-align: center; margin: 0; color: #94a3b8; font-size: 12px;">${t.footer}</p>
+  </div>
+</body>
+</html>
+  `.trim()
+}
+
+// ============================================================
+// GUARDIAN CONSENT EMAIL
+// ============================================================
+
+export interface GuardianConsentData {
+  guardianName?: string
+  studentName: string
+  orgName: string
+  consentUrl: string
+  language: string
+}
+
+export function guardianConsentTemplate(data: GuardianConsentData): string {
+  const { guardianName, studentName, orgName, consentUrl, language } = data
+  const isArabic = language === 'ar'
+  const dir = isArabic ? 'rtl' : 'ltr'
+
+  const translations = {
+    en: {
+      subject: `Parental consent required for ${studentName}`,
+      heading: 'Parental Consent Required',
+      greeting: guardianName ? `Dear ${guardianName},` : 'Dear Parent/Guardian,',
+      body: `${studentName} has signed up for Mentorshape through ${orgName} and requires your consent to participate in mentorship activities.`,
+      whatIs: 'What is Mentorshape?',
+      whatIsBody: 'Mentorshape is a safe, school-supervised mentorship platform that connects students with mentors to help them achieve their academic and career goals.',
+      safety: 'Safety Features:',
+      safetyItems: [
+        'All mentors are verified by the school',
+        'Sessions can be monitored by counselors',
+        'No personal contact information is shared',
+        'All communications are logged for safety'
+      ],
+      buttonText: 'Review & Provide Consent',
+      footer: 'If you have questions, please contact your school\'s counselor.',
+    },
+    ar: {
+      subject: `موافقة ولي الأمر مطلوبة لـ ${studentName}`,
+      heading: 'موافقة ولي الأمر مطلوبة',
+      greeting: guardianName ? `عزيزي/عزيزتي ${guardianName}،` : 'عزيزي ولي الأمر،',
+      body: `قام/قامت ${studentName} بالتسجيل في منصة Mentorshape من خلال ${orgName} ويحتاج إلى موافقتك للمشاركة في أنشطة الإرشاد.`,
+      whatIs: 'ما هي منصة Mentorshape؟',
+      whatIsBody: 'Mentorshape هي منصة إرشاد آمنة تحت إشراف المدرسة تربط الطلاب بالمرشدين لمساعدتهم في تحقيق أهدافهم الأكاديمية والمهنية.',
+      safety: 'ميزات السلامة:',
+      safetyItems: [
+        'يتم التحقق من جميع المرشدين من قبل المدرسة',
+        'يمكن للمستشارين مراقبة الجلسات',
+        'لا يتم مشاركة معلومات الاتصال الشخصية',
+        'يتم تسجيل جميع الاتصالات للسلامة'
+      ],
+      buttonText: 'مراجعة وتقديم الموافقة',
+      footer: 'إذا كانت لديك أسئلة، يرجى الاتصال بمستشار المدرسة.',
+    }
+  }
+
+  const t = translations[isArabic ? 'ar' : 'en']
+
+  return `
+<!DOCTYPE html>
+<html dir="${dir}" lang="${language}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${t.subject}</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 600px; margin: 0 auto; padding: 20px; direction: ${dir};">
+  <div style="background: #f8fafc; border-radius: 12px; padding: 32px;">
+    <div style="text-align: center; margin-bottom: 24px;">
+      <h1 style="font-size: 24px; font-weight: 700; margin: 0; color: #0f172a;">${t.heading}</h1>
+    </div>
+    
+    <div style="background: #fff; border-radius: 8px; padding: 24px; margin-bottom: 16px;">
+      <p style="margin: 0 0 16px; font-weight: 500;">${t.greeting}</p>
+      <p style="margin: 0 0 24px; color: #475569;">${t.body}</p>
+      
+      <div style="background: #f0fdf4; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <h3 style="margin: 0 0 8px; font-size: 16px; color: #166534;">${t.whatIs}</h3>
+        <p style="margin: 0; color: #166534; font-size: 14px;">${t.whatIsBody}</p>
+      </div>
+      
+      <div style="margin-bottom: 24px;">
+        <h4 style="margin: 0 0 12px; font-size: 14px; color: #0f172a;">${t.safety}</h4>
+        <ul style="margin: 0; padding-${isArabic ? 'right' : 'left'}: 20px;">
+          ${t.safetyItems.map(item => `<li style="margin-bottom: 8px; color: #475569; font-size: 14px;">${item}</li>`).join('')}
+        </ul>
+      </div>
+      
+      <div style="text-align: center;">
+        <a href="${consentUrl}" style="display: inline-block; padding: 14px 32px; background: #16a34a; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+          ${t.buttonText}
+        </a>
+      </div>
+    </div>
+    
+    <p style="text-align: center; margin: 0; color: #94a3b8; font-size: 12px;">${t.footer}</p>
+  </div>
+</body>
+</html>
+  `.trim()
+}
