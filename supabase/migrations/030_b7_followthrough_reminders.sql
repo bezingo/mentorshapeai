@@ -187,7 +187,7 @@ BEGIN
     sr.metadata,
     u.email as profile_email,
     p.display_name as profile_name,
-    p.locale as profile_locale
+    p.language as profile_locale
   FROM public.scheduled_reminders sr
   JOIN public.profiles p ON p.id = sr.profile_id
   JOIN public.users u ON u.id = p.user_id

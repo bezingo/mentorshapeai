@@ -62,7 +62,7 @@ SELECT
   pp.role,
   p.display_name,
   p.avatar_url,
-  p.locale,
+  p.language AS locale,
   COALESCE(
     (SELECT jsonb_agg(og.category) FROM public.onboarding_goals og WHERE og.profile_id = pp.profile_id),
     '[]'::jsonb
@@ -119,7 +119,7 @@ BEGIN
         (SELECT array_agg(og.category::text) FROM public.onboarding_goals og WHERE og.profile_id = pp.profile_id),
         '{}'::text[]
       ) as categories,
-      p.locale
+      p.language AS locale
     FROM public.program_participants pp
     JOIN public.profiles p ON p.id = pp.profile_id
     WHERE pp.program_id = p_program_id
@@ -139,7 +139,7 @@ BEGIN
         (SELECT array_agg(DISTINCT mo.category) FROM public.mentor_offers mo WHERE mo.profile_id = pp.profile_id AND mo.is_active),
         '{}'::text[]
       ) as offer_categories,
-      p.locale,
+      p.language AS locale,
       (
         SELECT COUNT(*) FROM public.matches m 
         WHERE m.mentor_profile_id = pp.profile_id 
