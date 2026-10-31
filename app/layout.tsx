@@ -1,27 +1,47 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Inter } from "next/font/google";
+import { Instrument_Sans, DM_Mono, IBM_Plex_Sans_Arabic } from "next/font/google";
 import { I18nProvider } from "@/lib/i18n";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
 import "@/styles/globals.css";
 
-// BoardUI's type scale resolves --font-inter (see styles/theme.css); the
-// legacy shadcn layer maps its --font-sans to the same variable.
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+// Mentorshape design system fonts:
+// - Instrument Sans for display and UI
+// - DM Mono for numbers, times, prices
+// - IBM Plex Sans Arabic for Arabic content
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const instrumentSans = Instrument_Sans({
   subsets: ["latin"],
+  variable: "--font-instrument-sans",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
+const dmMono = DM_Mono({
+  subsets: ["latin"],
+  variable: "--font-dm-mono",
+  display: "swap",
+  weight: ["400", "500"],
+});
+
+const ibmPlexArabic = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic"],
+  variable: "--font-ibm-plex-arabic",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+// Keep Inter as fallback for BoardUI compatibility (--font-inter)
+const interFallback = "--font-inter";
+
 export const metadata: Metadata = {
-  title: "MentorShape AI",
-  description: "MentorShape AI Application",
+  title: "Mentorshape",
+  description: "Grow with someone who has done it. AI takes the notes. You keep the conversation.",
   manifest: "/manifest.json",
-  themeColor: "#0f172a",
+  themeColor: "#1a1550",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "MentorShape",
+    title: "Mentorshape",
   },
 };
 
@@ -31,16 +51,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${instrumentSans.variable} ${dmMono.variable} ${ibmPlexArabic.variable}`}
+      suppressHydrationWarning
+    >
       <head>
-        {/* Restore the persisted BoardUI theme before first paint. */}
+        {/* Restore the persisted theme before first paint */}
         <script
           dangerouslySetInnerHTML={{
             __html: `try{if(localStorage.getItem("boardui:theme")==="dark")document.documentElement.classList.add("dark")}catch(e){}`,
           }}
         />
       </head>
-      <body className={`${geistMono.variable} antialiased`}>
+      <body className="font-sans antialiased">
         <I18nProvider>
           <ServiceWorkerRegistration />
           {children}

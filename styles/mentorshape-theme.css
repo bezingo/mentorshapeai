@@ -1,0 +1,327 @@
+/* ---------------------------------------------------------------------------
+ * Mentorshape Design System — Brand tokens
+ *
+ * This file overrides BoardUI defaults with Mentorshape's brand palette,
+ * typography, spacing, and radii from the HaveTML design system.
+ *
+ * Source: https://havetml.com/f/BuURtMjEs9 (mentorshape Design System · tokens)
+ *
+ * The palette centers on midnight (#1a1550) with four pastel tints for roles:
+ *   - sky (#9dc4ff) → Mentor
+ *   - lime (#e2f79e) → Mentee
+ *   - blush (#ffdce3) → AI
+ *   - ember (#ff5122) → Energy / CTA (one per screen)
+ * --------------------------------------------------------------------------- */
+
+@theme {
+  /* ===== Brand Colors ======================================================
+   * Primitives that don't change between themes. These are the poster colors.
+   * Use semantic tokens below (surface-*, ink-*, etc.) in components.
+   * ------------------------------------------------------------------------ */
+  --color-ms-midnight:     #1a1550;
+  --color-ms-midnight-700: #2a2470;
+  --color-ms-sky:          #9dc4ff;
+  --color-ms-lime:         #e2f79e;
+  --color-ms-blush:        #ffdce3;
+  --color-ms-ember:        #ff5122;
+  --color-ms-mist:         #f3f3fa;
+
+  /* ===== Spacing ==========================================================
+   * 4px base scale. Use space-N utilities: p-space-4, gap-space-3, etc.
+   * ------------------------------------------------------------------------ */
+  --spacing-space-1: 4px;
+  --spacing-space-2: 8px;
+  --spacing-space-3: 12px;
+  --spacing-space-4: 16px;
+  --spacing-space-5: 24px;
+  --spacing-space-6: 32px;
+  --spacing-space-7: 48px;
+  --spacing-space-8: 64px;
+  --spacing-space-9: 96px;
+
+  /* ===== Radii =============================================================
+   * Mentorshape uses larger, softer corners than BoardUI defaults.
+   * ------------------------------------------------------------------------ */
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   20px;
+  --radius-xl:   28px;
+  --radius-pill: 999px;
+
+  /* ===== Typography — Mentorshape styles ==================================
+   * Map design system styles to Tailwind utilities.
+   * Display: tight tracking, semibold 600, for headlines.
+   * Body: regular weight, generous line-height.
+   * Label: semibold for buttons and nav.
+   * Numeral/Mono: DM Mono for prices, stats, timestamps.
+   * ------------------------------------------------------------------------ */
+
+  /* Display XL - 72/68 */
+  --text-ms-display-xl: 72px;
+  --text-ms-display-xl--line-height: 68px;
+  --text-ms-display-xl--letter-spacing: -0.03em;
+  --text-ms-display-xl--font-weight: 600;
+
+  /* Display L - 48/48 */
+  --text-ms-display-l: 48px;
+  --text-ms-display-l--line-height: 48px;
+  --text-ms-display-l--letter-spacing: -0.025em;
+  --text-ms-display-l--font-weight: 600;
+
+  /* Display M - 32/34 */
+  --text-ms-display-m: 32px;
+  --text-ms-display-m--line-height: 34px;
+  --text-ms-display-m--letter-spacing: -0.02em;
+  --text-ms-display-m--font-weight: 600;
+
+  /* Title - 22/28 */
+  --text-ms-title: 22px;
+  --text-ms-title--line-height: 28px;
+  --text-ms-title--letter-spacing: -0.01em;
+  --text-ms-title--font-weight: 600;
+
+  /* Eyebrow - 12/16 */
+  --text-ms-eyebrow: 12px;
+  --text-ms-eyebrow--line-height: 16px;
+  --text-ms-eyebrow--letter-spacing: 0.08em;
+  --text-ms-eyebrow--font-weight: 600;
+
+  /* Body L - 17/26 */
+  --text-ms-body-l: 17px;
+  --text-ms-body-l--line-height: 26px;
+  --text-ms-body-l--letter-spacing: 0;
+  --text-ms-body-l--font-weight: 400;
+
+  /* Body - 15/22 */
+  --text-ms-body: 15px;
+  --text-ms-body--line-height: 22px;
+  --text-ms-body--letter-spacing: 0;
+  --text-ms-body--font-weight: 400;
+
+  /* Body S - 13/18 */
+  --text-ms-body-s: 13px;
+  --text-ms-body-s--line-height: 18px;
+  --text-ms-body-s--letter-spacing: 0;
+  --text-ms-body-s--font-weight: 400;
+
+  /* Label - 15/20 */
+  --text-ms-label: 15px;
+  --text-ms-label--line-height: 20px;
+  --text-ms-label--letter-spacing: 0;
+  --text-ms-label--font-weight: 600;
+
+  /* Label S - 13/16 */
+  --text-ms-label-s: 13px;
+  --text-ms-label-s--line-height: 16px;
+  --text-ms-label-s--letter-spacing: 0;
+  --text-ms-label-s--font-weight: 600;
+
+  /* Numeral - 40/40 (mono) */
+  --text-ms-numeral: 40px;
+  --text-ms-numeral--line-height: 40px;
+  --text-ms-numeral--letter-spacing: -0.02em;
+  --text-ms-numeral--font-weight: 500;
+
+  /* Mono - 12/16 */
+  --text-ms-mono: 12px;
+  --text-ms-mono--line-height: 16px;
+  --text-ms-mono--letter-spacing: 0.02em;
+  --text-ms-mono--font-weight: 500;
+
+  /* ===== Font Families ====================================================
+   * Instrument Sans for display and UI, DM Mono for data, IBM Plex Sans Arabic
+   * for Arabic. Loaded via next/font in app/layout.tsx.
+   * ------------------------------------------------------------------------ */
+  --font-sans: var(--font-instrument-sans), var(--font-ibm-plex-arabic),
+               "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-dm-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+
+/* ---------------------------------------------------------------------------
+ * Semantic Color Tokens — Light Theme
+ *
+ * These tokens reference the brand primitives and flip in dark mode.
+ * Components use these, not the raw colors.
+ * --------------------------------------------------------------------------- */
+:root {
+  /* Surfaces */
+  --color-ms-surface-100: #f3f3fa;  /* Page ground */
+  --color-ms-surface-000: #ffffff;  /* Cards, inputs */
+  --color-ms-surface-200: #e8e8f3;  /* Wells, selected rows */
+
+  /* Text / Ink */
+  --color-ms-ink:        #1a1550;
+  --color-ms-ink-muted:  #4f4c78;
+  --color-ms-ink-subtle: #64618c;
+
+  /* Tint text (on sky, lime, blush, ember fills) */
+  --color-ms-on-tint:    #1a1550;
+  --color-ms-on-ember:   #1a1550;
+  --color-ms-on-midnight: #f3f3fa;
+
+  /* Ember as text */
+  --color-ms-ember-text: #b3320b;
+
+  /* Interactive */
+  --color-ms-action:     #1a1550;
+  --color-ms-on-action:  #ffffff;
+  --color-ms-focus:      #c2380d;
+
+  /* Lines / Borders */
+  --color-ms-line:        #dcdbea;
+  --color-ms-line-strong: #7f7ca8;
+
+  /* Status */
+  --color-ms-success: #17704a;
+  --color-ms-warning: #8a5300;
+  --color-ms-danger:  #bf2a1f;
+
+  /* Shadow */
+  --shadow-ms-float: 0 1px 2px rgba(26,21,80,0.08), 0 12px 32px rgba(26,21,80,0.14);
+
+  /* Map to BoardUI semantic tokens for component compatibility */
+  --color-background-full:             var(--color-ms-surface-100);
+  --color-background-primary-default:  var(--color-ms-surface-000);
+  --color-background-secondary-default: var(--color-ms-surface-100);
+  --color-background-tertiary-default: var(--color-ms-surface-200);
+
+  --color-text-primary:   var(--color-ms-ink);
+  --color-text-secondary: var(--color-ms-ink-muted);
+  --color-text-tertiary:  var(--color-ms-ink-subtle);
+
+  --color-separator-border:       var(--color-ms-line);
+  --color-border-button-default:  var(--color-ms-line);
+  --color-border-focus-ring:      var(--color-ms-focus);
+
+  --color-foreground-icon-primary:   var(--color-ms-ink);
+  --color-foreground-icon-secondary: var(--color-ms-ink-muted);
+  --color-foreground-icon-tertiary:  var(--color-ms-ink-subtle);
+}
+
+/* ---------------------------------------------------------------------------
+ * Dark Theme Overrides
+ *
+ * Midnight becomes the ground; tints stay at full saturation (poster style).
+ * --------------------------------------------------------------------------- */
+.dark {
+  /* Surfaces */
+  --color-ms-surface-100: #100c3a;  /* Deep midnight ground */
+  --color-ms-surface-000: #1a1550;  /* Cards on the ground */
+  --color-ms-surface-200: #2a2470;  /* Wells inside cards */
+
+  /* Text / Ink */
+  --color-ms-ink:        #f3f3fa;
+  --color-ms-ink-muted:  #bdbbdd;
+  --color-ms-ink-subtle: #a3a1cc;
+
+  /* Ember as text (brighter for dark bg) */
+  --color-ms-ember-text: #ff8a63;
+
+  /* Interactive */
+  --color-ms-action:    #f3f3fa;
+  --color-ms-on-action: #1a1550;
+  --color-ms-focus:     #ff8a63;
+
+  /* Lines / Borders */
+  --color-ms-line:        #332d7a;
+  --color-ms-line-strong: #7d78c4;
+
+  /* Status (brighter for dark) */
+  --color-ms-success: #7fe0ae;
+  --color-ms-warning: #ffc56b;
+  --color-ms-danger:  #ff8f86;
+
+  /* Shadow */
+  --shadow-ms-float: 0 1px 2px rgba(0,0,0,0.4), 0 12px 32px rgba(0,0,0,0.5);
+
+  /* Map to BoardUI semantic tokens */
+  --color-background-full:             var(--color-ms-surface-100);
+  --color-background-primary-default:  var(--color-ms-surface-000);
+  --color-background-secondary-default: var(--color-ms-surface-100);
+  --color-background-tertiary-default: var(--color-ms-surface-200);
+
+  --color-text-primary:   var(--color-ms-ink);
+  --color-text-secondary: var(--color-ms-ink-muted);
+  --color-text-tertiary:  var(--color-ms-ink-subtle);
+
+  --color-separator-border:       var(--color-ms-line);
+  --color-border-button-default:  var(--color-ms-line);
+  --color-border-focus-ring:      var(--color-ms-focus);
+
+  --color-foreground-icon-primary:   var(--color-ms-ink);
+  --color-foreground-icon-secondary: var(--color-ms-ink-muted);
+  --color-foreground-icon-tertiary:  var(--color-ms-ink-subtle);
+}
+
+/* ---------------------------------------------------------------------------
+ * Re-export brand colors as Tailwind utilities
+ * --------------------------------------------------------------------------- */
+@theme inline {
+  /* Brand primitives as bg-ms-*, text-ms-*, border-ms-* utilities */
+  --color-ms-midnight:     var(--color-ms-midnight);
+  --color-ms-midnight-700: var(--color-ms-midnight-700);
+  --color-ms-sky:          var(--color-ms-sky);
+  --color-ms-lime:         var(--color-ms-lime);
+  --color-ms-blush:        var(--color-ms-blush);
+  --color-ms-ember:        var(--color-ms-ember);
+  --color-ms-mist:         var(--color-ms-mist);
+
+  /* Semantic tokens */
+  --color-ms-surface-100:  var(--color-ms-surface-100);
+  --color-ms-surface-000:  var(--color-ms-surface-000);
+  --color-ms-surface-200:  var(--color-ms-surface-200);
+  --color-ms-ink:          var(--color-ms-ink);
+  --color-ms-ink-muted:    var(--color-ms-ink-muted);
+  --color-ms-ink-subtle:   var(--color-ms-ink-subtle);
+  --color-ms-on-tint:      var(--color-ms-on-tint);
+  --color-ms-on-ember:     var(--color-ms-on-ember);
+  --color-ms-on-midnight:  var(--color-ms-on-midnight);
+  --color-ms-ember-text:   var(--color-ms-ember-text);
+  --color-ms-action:       var(--color-ms-action);
+  --color-ms-on-action:    var(--color-ms-on-action);
+  --color-ms-focus:        var(--color-ms-focus);
+  --color-ms-line:         var(--color-ms-line);
+  --color-ms-line-strong:  var(--color-ms-line-strong);
+  --color-ms-success:      var(--color-ms-success);
+  --color-ms-warning:      var(--color-ms-warning);
+  --color-ms-danger:       var(--color-ms-danger);
+}
+
+/* ---------------------------------------------------------------------------
+ * Utility classes for Mentorshape role-specific fills
+ * --------------------------------------------------------------------------- */
+.ms-mentor-fill { background-color: var(--color-ms-sky); color: var(--color-ms-on-tint); }
+.ms-mentee-fill { background-color: var(--color-ms-lime); color: var(--color-ms-on-tint); }
+.ms-ai-fill { background-color: var(--color-ms-blush); color: var(--color-ms-on-tint); }
+.ms-ember-fill { background-color: var(--color-ms-ember); color: var(--color-ms-on-ember); }
+.ms-midnight-fill { background-color: var(--color-ms-midnight); color: var(--color-ms-on-midnight); }
+
+/* Eyebrow text transform */
+.ms-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ---------------------------------------------------------------------------
+ * Arabic / RTL support
+ *
+ * When html[lang="ar"][dir="rtl"], Arabic-specific adjustments apply.
+ * Layout already uses logical properties (margin-inline-start, etc.) throughout.
+ * --------------------------------------------------------------------------- */
+html[lang="ar"] {
+  --font-sans: var(--font-ibm-plex-arabic), var(--font-instrument-sans),
+               Tahoma, sans-serif;
+}
+
+html[lang="ar"] .ms-eyebrow {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Arabic display styles need looser line-height */
+html[lang="ar"] {
+  --text-ms-display-xl--line-height: 94px;  /* ~1.3x */
+  --text-ms-display-l--line-height: 62px;
+  --text-ms-display-m--line-height: 42px;
+  --text-ms-title--line-height: 31px;       /* ~1.4x */
+}

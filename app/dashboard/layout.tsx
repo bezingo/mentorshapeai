@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import { DashboardSidebar } from '@/components/layout/dashboard-sidebar'
 import { DashboardHeader } from '@/components/layout/dashboard-header'
+import { MobileBottomNav } from '@/components/layout/mobile-bottom-nav'
 import { QueryProvider } from '@/components/providers/query-provider'
 import { getCurrentProfile } from '@/lib/auth-helpers'
 import { getOrgMembership } from '@/lib/auth/org-access'
@@ -13,7 +14,7 @@ export default async function DashboardLayout({
 }: {
   children: ReactNode
 }) {
-  // Resolve roles for the sidebar (profile auto-creates on first login)
+  // Resolve roles for navigation (profile auto-creates on first login)
   const profile = await getCurrentProfile()
   const orgMembership = profile ? await getOrgMembership(profile.id) : null
 
@@ -24,12 +25,21 @@ export default async function DashboardLayout({
 
   return (
     <QueryProvider>
-      <div className="flex min-h-screen bg-background-full">
+      <div className="flex min-h-screen bg-ms-surface-100">
+        {/* Desktop sidebar - 248px wide per design system */}
         <DashboardSidebar roles={roles} />
-        <div className="min-w-0 flex-1 lg:pl-64">
+        
+        {/* Main content area - offset for sidebar on desktop */}
+        <div className="min-w-0 flex-1 lg:ps-[260px]">
           <DashboardHeader />
-          <main className="p-6">{children}</main>
+          {/* pb-24 on mobile for bottom nav clearance */}
+          <main className="p-4 pb-24 lg:p-6 lg:pb-6">
+            {children}
+          </main>
         </div>
+
+        {/* Mobile bottom navigation */}
+        <MobileBottomNav />
       </div>
     </QueryProvider>
   )
