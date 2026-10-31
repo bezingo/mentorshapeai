@@ -14,6 +14,7 @@ const publicRoutes = [
   '/sign-in',
   '/sign-up',
   '/onboarding', // Onboarding flow
+  '/onboarding/demo', // Demo page for screenshots
   '/g/', // Public goal pages (prefix match)
   '/m/', // Public mentor pages (prefix match)
   '/pricing',
